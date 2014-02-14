@@ -1,15 +1,19 @@
 'use strict';
 
 module.exports = function (grunt) {
-  // Show elapsed time at the end
-  require('time-grunt')(grunt);
   // Load all grunt tasks
   require('load-grunt-tasks')(grunt);
 
   // Project configuration.
   grunt.initConfig({
-    nodeunit: {
-      files: ['test/**/*_test.js']
+    simplemocha: {
+      options: {
+        timeout: 3000,
+        ignoreLeaks: false,
+        ui: 'bdd',
+        reporter: 'tap'
+      },
+      all: { src: ['test/**/*.js'] }
     },
     jshint: {
       options: {
@@ -33,16 +37,15 @@ module.exports = function (grunt) {
       },
       lib: {
         files: '<%= jshint.lib.src %>',
-        tasks: ['jshint:lib', 'nodeunit']
+        tasks: ['jshint:lib', 'simplemocha']
       },
       test: {
         files: '<%= jshint.test.src %>',
-        tasks: ['jshint:test', 'nodeunit']
+        tasks: ['jshint:test', 'simplemocha']
       }
     }
   });
 
   // Default task.
-  grunt.registerTask('default', ['jshint', 'nodeunit']);
-
+  grunt.registerTask('default', ['jshint', 'simplemocha']);
 };

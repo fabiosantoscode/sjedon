@@ -1,36 +1,25 @@
+/* globals describe:false, it:false, beforeEach: false */
 'use strict';
 
-var sjedon = require('../lib/sjedon.js');
+var ok = require('assert')
+var sinon = require('sinon')
+var Sjedon = require('../lib/sjedon.js')
 
-/*
-  ======== A Handy Little Nodeunit Reference ========
-  https://github.com/caolan/nodeunit
+describe('Sjedon class', function () {
+    it('Can be called or new\'d. Result is always Sjedon instance', function() {
+        /* jshint newcap:false */
+        // tests here
+        var called = Sjedon()
+        var newed = new Sjedon()
+        ok(called instanceof Sjedon)
+        ok(newed instanceof Sjedon)
+    })
+})
 
-  Test methods:
-    test.expect(numAssertions)
-    test.done()
-  Test assertions:
-    test.ok(value, [message])
-    test.equal(actual, expected, [message])
-    test.notEqual(actual, expected, [message])
-    test.deepEqual(actual, expected, [message])
-    test.notDeepEqual(actual, expected, [message])
-    test.strictEqual(actual, expected, [message])
-    test.notStrictEqual(actual, expected, [message])
-    test.throws(block, [error], [message])
-    test.doesNotThrow(block, [error], [message])
-    test.ifError(value)
-*/
+describe('Sjedon instances', function () {
+    var sjedon
+    beforeEach(function () { sjedon = new Sjedon() })
 
-exports.sjedon = {
-  setUp: function(done) {
-    // setup here
-    done();
-  },
-  'no args': function(test) {
-    test.expect(1);
-    // tests here
-    test.equal(sjedon.awesome(), 'awesome', 'should be awesome.');
-    test.done();
-  }
-};
+    sinon.spy(sjedon)
+})
+
