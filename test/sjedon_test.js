@@ -38,6 +38,17 @@ describe('code:', function () {
             ok.deepEqual(evalExpr('({ a: 1, b: 2 })'), { a: 1, b: 2});
         });
     });
+    describe('operators:', function () {
+        it('comma', function () {
+            ok.equal(evalExpr('1,2,3'), 3);
+        });
+    });
+    describe('unary operators', function () {
+        it('void', function () {
+            ok.strictEqual(evalExpr('void 1', undefined));
+            ok.strictEqual(evalExpr('void 1', undefined));
+        })
+    });
     it('functions and returns', function () {
         var sjedon = aSjedon('(function () { return 3; })');
         var result = sjedon.callFunction(sjedon.ast.body[0].expression);
