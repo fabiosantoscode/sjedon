@@ -24,16 +24,19 @@ describe('code:', function () {
         }
         return new Sjedon(ast);
     }
-    describe('evalExpression', function () {
-        it('literals', function () {
-            var sjedon = aSjedon('3');
-            ok.equal(sjedon.evalExpression(sjedon.ast.body[0].expression), 3);
-            sjedon = aSjedon('"3"')
-            ok.equal(sjedon.evalExpression(sjedon.ast.body[0].expression), "3");
-            sjedon = aSjedon("'3'")
-            ok.equal(sjedon.evalExpression(sjedon.ast.body[0].expression), "3");
+    function evalExpr(expr) {
+        var sjedon = aSjedon(expr);
+        return sjedon.evalExpression(sjedon.ast.body[0].expression);
+    }
+    describe('literals:', function () {
+        it('basic', function () {
+            ok.strictEqual(evalExpr('3'), 3);
+            ok.strictEqual(evalExpr('"3"'), "3");
         });
-        // TODO
+        it('recursive', function () {
+            ok.deepEqual(evalExpr('[1,2,3]'), [1,2,3]);
+            ok.deepEqual(evalExpr('({ a: 1, b: 2 })'), { a: 1, b: 2});
+        });
     });
     it('functions and returns', function () {
         var sjedon = aSjedon('(function () { return 3; })');
@@ -43,5 +46,6 @@ describe('code:', function () {
     });
 })
 
-
-
+describe('contexts:', function () {
+    
+})
