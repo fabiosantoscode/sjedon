@@ -1,6 +1,10 @@
 'use strict';
 
 module.exports = function (grunt) {
+  require('jit-grunt')(grunt, {
+    'simplemocha': 'grunt-simple-mocha'
+  });
+
   // Project configuration.
   grunt.initConfig({
     simplemocha: {
@@ -43,9 +47,6 @@ module.exports = function (grunt) {
     }
   });
 
-  grunt.loadNpmTasks('grunt-simple-mocha');
-  grunt.loadNpmTasks('grunt-contrib-jshint');
-  grunt.loadNpmTasks('grunt-contrib-watch');
   // Default task.
   grunt.registerTask('default', ['jshint', 'simplemocha']);
 };
