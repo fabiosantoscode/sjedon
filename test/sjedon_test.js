@@ -17,17 +17,18 @@ describe('Sjedon class', function () {
     })
 })
 
+function aSjedon(ast) {
+    if (typeof ast === 'string') {
+        ast = esprima.parse(ast);
+    }
+    return new Sjedon(ast);
+}
+function evalExpr(expr) {
+    var sjedon = new Sjedon(esprima.parse(expr));
+    return sjedon.evalExpression(sjedon.ast.body[0].expression);
+}
+
 describe('code:', function () {
-    function aSjedon(ast) {
-        if (typeof ast === 'string') {
-            ast = esprima.parse(ast);
-        }
-        return new Sjedon(ast);
-    }
-    function evalExpr(expr) {
-        var sjedon = aSjedon(expr);
-        return sjedon.evalExpression(sjedon.ast.body[0].expression);
-    }
     describe('literals:', function () {
         it('basic', function () {
             ok.strictEqual(evalExpr('3'), 3);
@@ -55,8 +56,29 @@ describe('code:', function () {
         ok.equal(result, 3);
         ok.equal(typeof result, 'number');
     });
+    it('functions return undefined by default', function () {
+        var sjedon = aSjedon('(function () { return; })');
+        var result = sjedon.callFunction(sjedon.ast.body[0].expression);
+        ok.equal(result, undefined);
+        ok.equal(typeof result, 'undefined');
+
+        sjedon = aSjedon('(function () { })');
+        result = sjedon.callFunction(sjedon.ast.body[0].expression);
+        ok.equal(result, undefined);
+        ok.equal(typeof result, 'undefined');
+    });
 })
 
-describe('contexts:', function () {
-    
-})
+xdescribe('var scope', function () {
+    it('we can access variables within this function', function () {
+        evalExpr('(function () {' +
+            'var x = 1;' +
+            'var y;' +
+            'return [x, y]' +
+        '}())');
+    });
+    it('and arguments', function () {
+        ok.strictEqual(evalExpr('(function(a){return a;}(1))'), 1);
+    });
+});
+
