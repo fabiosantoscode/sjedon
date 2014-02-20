@@ -69,16 +69,55 @@ describe('code:', function () {
     });
 })
 
-xdescribe('var scope', function () {
-    it('we can access variables within this function', function () {
+describe('var scope', function () {
+    var sjedon
+    var emptyFunc
+    var xFunc
+    var globDecl
+    var xDecl
+    var xDeclInFunc
+    beforeEach(function() {
+        sjedon = aSjedon('var glob,x;' +
+            '(function () {}, function() { var x })');
+        var funcs = sjedon.ast.body[1].expression.expressions
+        ok(funcs && funcs.length === 2)
+        emptyFunc = funcs[0]; xFunc = funcs[1]
+        xDeclInFunc = xFunc.body.body[0].declarations[0]
+        var decls = sjedon.ast.body[0].declarations
+        globDecl = decls[0]; xDecl = decls[1];
+        ok(xDeclInFunc); ok(emptyFunc); ok(xFunc); ok(globDecl); ok(xDecl);
+    })
+    describe('list variables in the innermost scope', function () {
+        it('on empty function', function () {
+            var vars = sjedon.scopeVariables(emptyFunc)
+            ok.deepEqual(vars, ['arguments']);
+        })
+        it('on xDecl function', function () {
+            var vars = sjedon.scopeVariables(xFunc)
+            ok.deepEqual(vars, ['arguments', 'x']);
+        })
+    })
+    xit('we are able to find the scope by navigating upwards in the AST', function () {
+        var foundScope = sjedon.findScope(xFunc.body.body[0])
+        ok(foundScope)
+        ok.strictEqual(foundScope, xFunc)
+    })
+    xit('findScope for a specific variable', function () {
+        var foundScope = sjedon.findScope(xFunc.body.body[0], 'x')
+        var foundScopeOuter = sjedon.findScope(xFunc.body.body[0], 'glob')
+        ok(foundScope); ok(foundScopeOuter)
+        ok.strictEqual(foundScope, xFunc)
+        ok.strictEqual(foundScopeOuter, sjedon.ast)
+    })
+    xit('we can access variables within this function', function () {
         evalExpr('(function () {' +
             'var x = 1;' +
             'var y;' +
             'return [x, y]' +
         '}())');
-    });
-    it('and arguments', function () {
+    })
+    xit('and arguments', function () {
         ok.strictEqual(evalExpr('(function(a){return a;}(1))'), 1);
-    });
+    })
 });
 
