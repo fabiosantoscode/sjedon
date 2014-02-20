@@ -34,9 +34,13 @@ describe('code:', function () {
             ok.strictEqual(evalExpr('3'), 3);
             ok.strictEqual(evalExpr('"3"'), "3");
         });
-        it('recursive', function () {
+        it('arrays, objects', function () {
             ok.deepEqual(evalExpr('[1,2,3]'), [1,2,3]);
-            ok.deepEqual(evalExpr('({ a: 1, b: 2 })'), { a: 1, b: 2});
+            ok.deepEqual(evalExpr('({ a: 1, "b": 2 })'), { a: 1, b: 2});
+            ok.deepEqual(evalExpr('([[], [1]])'), [[], [1]]);
+        });
+        /* TODO */xit('recursive arrays, objects', function () {
+            ok.deepEqual(evalExpr('{a:[1,2,{b:3}]}', { a: [1, 2, { b: 3 }]}))
         });
     });
     describe('operators:', function () {
@@ -47,7 +51,7 @@ describe('code:', function () {
     describe('unary operators', function () {
         it('void', function () {
             ok.strictEqual(evalExpr('void 1', undefined));
-            ok.strictEqual(evalExpr('void 1', undefined));
+            ok.strictEqual(evalExpr('void {}', undefined));
         })
     });
     it('functions and returns', function () {
@@ -120,4 +124,34 @@ describe('var scope', function () {
         ok.strictEqual(evalExpr('(function(a){return a;}(1))'), 1);
     })
 });
+
+describe('StackFrame class', function () {
+    var sjedon
+    var a, b
+    beforeEach(function () {
+        sjedon = aSjedon('' +
+            function a() {
+                b();
+            } + '\n' +
+            function b() {
+                
+            } + '\n' +
+            'a();')
+        a = sjedon.ast.body[0]
+        b = sjedon.ast.body[0]
+        ok(a), ok(b)
+    })
+    describe('constructor', function () {
+        it('calls scopeVariables', function () {
+            sinon.spy(sjedon, 'scopeVariables')
+
+            new Sjedon.StackFrame(sjedon, a, null)
+
+            ok(sjedon.scopeVariables.calledOnce)
+            ok(sjedon.scopeVariables.calledWith(a))
+        })
+    })
+    // TODO fetch variables
+    // TODO change variables
+})
 
