@@ -10,14 +10,15 @@ describe('Sjedon class', function () {
     it('Can be called or new\'d. Result is always a Sjedon instance', function() {
         /* jshint newcap:false */
         // tests here
-        var called = Sjedon()
-        var newed = new Sjedon()
+        var called = Sjedon(esprima.parse(''))
+        var newed = new Sjedon(esprima.parse(''))
         ok(called instanceof Sjedon)
         ok(newed instanceof Sjedon)
     })
 })
 
 function aSjedon(ast) {
+    if (typeof ast === 'function') { ast = '(' + ast + ')();' }
     if (typeof ast === 'string') {
         ast = esprima.parse(ast);
     }
@@ -84,8 +85,6 @@ describe('functions', function () {
         it('cause StackFrame\'s to be constructed.', function () {
             var fakeStackFrame = {fake: 'stackframe'};
             var spy = sinon.stub(Sjedon, 'StackFrame').returns(fakeStackFrame);
-            var pushspy = sinon.spy(func.stack, 'push');
-            var popspy = sinon.spy(func.stack, 'pop');
 
             func.callFunction(funcAST);
 
@@ -93,10 +92,6 @@ describe('functions', function () {
                 ok(spy.calledOnce)
                 ok(spy.calledWithNew())
                 ok.equal(spy.lastCall.args.length, 3)
-
-                ok.equal(pushspy.callCount, 1)
-                ok(pushspy.lastCall.args[0] === fakeStackFrame)
-                ok.equal(popspy.callCount, 1)
             } finally {
                 spy.restore();
             }
@@ -142,16 +137,6 @@ describe('var scope:', function () {
     })
     it('return null for implicit variables', function () {
         ok.strictEqual(sjedon.findScope(emptyFunc, 'notexist'), null)
-    })
-    xit('we can access variables within this function', function () {
-        evalExpr('(function () {' +
-            'var x = 1;' +
-            'var y;' +
-            'return [x, y]' +
-        '}())');
-    })
-    xit('and arguments', function () {
-        ok.strictEqual(evalExpr('(function(a){return a;}(1))'), 1);
     })
 });
 
@@ -222,6 +207,22 @@ describe('StackFrame', function () {
                 bFrame.assignVar('notexist', 'whatevs')
             })
         })
-    });
+    })
+    describe('tracing', function () {
+        it('get stack info above a StackFrame', function () {
+            var trace = bFrame.trace()
+            ok(trace && 'length' in trace)
+            ok.equal(trace.length, 3)
+            ok(trace[0].frame === globalFrame)
+            ok(trace[1].frame === aFrame)
+            ok(trace[2].frame === bFrame)
+        })
+        it('the bottom stack frame has an alias in the Sjedon instance', function () {
+            ok('currentFrame' in sjedon)
+            sjedon.currentFrame = { trace: sinon.stub().returns(123) }
+            ok.equal(sjedon.trace(), 123)
+            ok(sjedon.currentFrame.trace.calledOnce)
+        })
+    })
 })
 
