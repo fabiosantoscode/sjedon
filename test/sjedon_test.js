@@ -154,6 +154,7 @@ describe('StackFrame', function () {
             '\n' +
             function b() {
                 var y
+                y = 3
             } +
             '\n' +
             'a();')
@@ -163,6 +164,7 @@ describe('StackFrame', function () {
         globalFrame = new Sjedon.StackFrame(sjedon, sjedon.ast, null)
         aFrame = new Sjedon.StackFrame(sjedon, a, globalFrame)
         bFrame = new Sjedon.StackFrame(sjedon, b, aFrame)
+        sjedon.currentFrame = aFrame
     })
     describe('constructor', function () {
         it('calls scopeVariables', function () {
@@ -222,6 +224,16 @@ describe('StackFrame', function () {
             sjedon.currentFrame = { trace: sinon.stub().returns(123) }
             ok.equal(sjedon.trace(), 123)
             ok(sjedon.currentFrame.trace.calledOnce)
+        })
+    })
+    describe('running a function', function () {
+        it('assignments occur', function () {
+            var stub
+            sinon.stub(Sjedon, 'StackFrame')
+                .returns((stub = { assignVar: sinon.stub() }))
+            sjedon.runFunction(b)
+            ok(stub.assignVar.calledOnce)
+            ok.deepEqual(stub.assignVar.lastCall.args, ['y', 3])
         })
     })
 })
