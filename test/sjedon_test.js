@@ -39,8 +39,8 @@ describe('code:', function () {
             ok.deepEqual(evalExpr('({ a: 1, "b": 2 })'), { a: 1, b: 2});
             ok.deepEqual(evalExpr('([[], [1]])'), [[], [1]]);
         });
-        /* TODO */xit('recursive arrays, objects', function () {
-            ok.deepEqual(evalExpr('{a:[1,2,{b:3}]}', { a: [1, 2, { b: 3 }]}))
+        it('recursive arrays, objects', function () {
+            ok.deepEqual(evalExpr('({a:[1,2,{b:3}]})'), {a:[1,2,{b:3}]})
         });
     });
     describe('operators:', function () {
@@ -54,23 +54,54 @@ describe('code:', function () {
             ok.strictEqual(evalExpr('void {}', undefined));
         })
     });
-    it('functions and returns', function () {
-        var sjedon = aSjedon('(function () { return 3; })');
-        var result = sjedon.callFunction(sjedon.ast.body[0].expression);
+})
+
+describe('functions', function () {
+    var simpleFunc, simpleFuncAST
+    var func, funcAST
+    beforeEach(function () {
+        simpleFunc = aSjedon('(function () { })')
+        simpleFuncAST = simpleFunc.ast.body[0].expression
+        func = aSjedon('(function () { return 3; })')
+        funcAST = func.ast.body[0].expression
+    })
+    it('return values', function () {
+        var result = simpleFunc.callFunction(funcAST);
         ok.equal(result, 3);
         ok.equal(typeof result, 'number');
-    });
-    it('functions return undefined by default', function () {
-        var sjedon = aSjedon('(function () { return; })');
-        var result = sjedon.callFunction(sjedon.ast.body[0].expression);
+    })
+    it('return undefined by default', function () {
+        var emptyReturn = aSjedon('(function () { return; })');
+        var result = emptyReturn.callFunction(emptyReturn.ast.body[0].expression);
         ok.equal(result, undefined);
         ok.equal(typeof result, 'undefined');
 
-        sjedon = aSjedon('(function () { })');
-        result = sjedon.callFunction(sjedon.ast.body[0].expression);
+        result = simpleFunc.callFunction(simpleFuncAST);
         ok.equal(result, undefined);
         ok.equal(typeof result, 'undefined');
-    });
+    })
+    describe('calling functions', function () {
+        it('cause StackFrame\'s to be constructed.', function () {
+            var fakeStackFrame = {fake: 'stackframe'};
+            var spy = sinon.stub(Sjedon, 'StackFrame').returns(fakeStackFrame);
+            var pushspy = sinon.spy(func.stack, 'push');
+            var popspy = sinon.spy(func.stack, 'pop');
+
+            func.callFunction(funcAST);
+
+            try {
+                ok(spy.calledOnce)
+                ok(spy.calledWithNew())
+                ok.equal(spy.lastCall.args.length, 3)
+
+                ok.equal(pushspy.callCount, 1)
+                ok(pushspy.lastCall.args[0] === fakeStackFrame)
+                ok.equal(popspy.callCount, 1)
+            } finally {
+                spy.restore();
+            }
+        })
+    })
 })
 
 describe('var scope', function () {
