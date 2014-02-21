@@ -104,7 +104,7 @@ describe('functions', function () {
     })
 })
 
-describe('var scope', function () {
+describe('var scope:', function () {
     var sjedon
     var emptyFunc
     var xFunc
@@ -132,17 +132,16 @@ describe('var scope', function () {
             ok.deepEqual(vars, ['arguments', 'x']);
         })
     })
-    xit('we are able to find the scope by navigating upwards in the AST', function () {
-        var foundScope = sjedon.findScope(xFunc.body.body[0])
-        ok(foundScope)
+    it('we are able to find the scope of a variable', function () {
+        var foundScope = sjedon.findScope(xFunc, 'x')
         ok.strictEqual(foundScope, xFunc)
     })
-    xit('findScope for a specific variable', function () {
-        var foundScope = sjedon.findScope(xFunc.body.body[0], 'x')
-        var foundScopeOuter = sjedon.findScope(xFunc.body.body[0], 'glob')
-        ok(foundScope); ok(foundScopeOuter)
-        ok.strictEqual(foundScope, xFunc)
-        ok.strictEqual(foundScopeOuter, sjedon.ast)
+    it('getting to the global scope', function () {
+        var foundScope = sjedon.findScope(emptyFunc, 'x')
+        ok.strictEqual(foundScope, sjedon.ast)
+    })
+    it('return null for implicit variables', function () {
+        ok.strictEqual(sjedon.findScope(emptyFunc, 'notexist'), null)
     })
     xit('we can access variables within this function', function () {
         evalExpr('(function () {' +
@@ -156,21 +155,29 @@ describe('var scope', function () {
     })
 });
 
-describe('StackFrame class', function () {
+describe('StackFrame', function () {
     var sjedon
     var a, b
+    var globalFrame, aFrame, bFrame
     beforeEach(function () {
         sjedon = aSjedon('' +
+            'var globVar; \n' +
             function a() {
+                var x
                 b();
-            } + '\n' +
+            } +
+            '\n' +
             function b() {
-                
-            } + '\n' +
+                var y
+            } +
+            '\n' +
             'a();')
-        a = sjedon.ast.body[0]
-        b = sjedon.ast.body[0]
+        a = sjedon.ast.body[1]
+        b = sjedon.ast.body[2]
         ok(a), ok(b)
+        globalFrame = new Sjedon.StackFrame(sjedon, sjedon.ast, null)
+        aFrame = new Sjedon.StackFrame(sjedon, a, globalFrame)
+        bFrame = new Sjedon.StackFrame(sjedon, b, aFrame)
     })
     describe('constructor', function () {
         it('calls scopeVariables', function () {
@@ -181,8 +188,40 @@ describe('StackFrame class', function () {
             ok(sjedon.scopeVariables.calledOnce)
             ok(sjedon.scopeVariables.calledWith(a))
         })
+        it('starts with an object with "!" + variables as keys', function () {
+            ok.deepEqual(globalFrame.variables, {
+                "!globVar": undefined,
+                "!a": undefined,
+                "!b": undefined
+            })
+
+            ok.deepEqual(bFrame.variables, {
+                '!arguments': undefined,
+                '!y': undefined
+            })
+        })
     })
-    // TODO fetch variables
-    // TODO change variables
+    describe('variables', function () {
+        beforeEach(function () {
+            globalFrame.variables['!someValue'] = 'someValue'
+        })
+        it('can be fetched', function () {
+            ok.equal(aFrame.fetchVar('x'), undefined)
+            ok.equal(aFrame.fetchVar('someValue'), 'someValue')
+        })
+        it('can be assigned', function () {
+            bFrame.assignVar('y', 'yeah')
+            ok.equal(bFrame.fetchVar('y'), 'yeah')
+        })
+        it('trying to set a global works', function () {
+            bFrame.assignVar('globVar', 'yeah')
+            ok.equal(globalFrame.fetchVar('globVar'), 'yeah')
+        })
+        it('can\'t set a global if it is not declared', function () {
+            ok.throws(function () {
+                bFrame.assignVar('notexist', 'whatevs')
+            })
+        })
+    });
 })
 
