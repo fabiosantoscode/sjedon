@@ -91,7 +91,6 @@ describe('functions', function () {
             try {
                 ok(spy.calledOnce)
                 ok(spy.calledWithNew())
-                ok.equal(spy.lastCall.args.length, 3)
             } finally {
                 spy.restore();
             }
@@ -161,16 +160,32 @@ describe('StackFrame', function () {
         a = sjedon.ast.body[1]
         b = sjedon.ast.body[2]
         ok(a), ok(b)
-        globalFrame = new Sjedon.StackFrame(sjedon, sjedon.ast, null)
-        aFrame = new Sjedon.StackFrame(sjedon, a, globalFrame)
-        bFrame = new Sjedon.StackFrame(sjedon, b, aFrame)
+        globalFrame = new Sjedon.StackFrame({
+            sjedon: sjedon,
+            ast: sjedon.ast,
+            parent: null
+        })
+        aFrame = new Sjedon.StackFrame({
+            sjedon: sjedon,
+            ast: a,
+            parent: globalFrame
+        })
+        bFrame = new Sjedon.StackFrame({
+            sjedon: sjedon,
+            ast: b,
+            parent: aFrame
+        })
         sjedon.currentFrame = aFrame
     })
     describe('constructor', function () {
         it('calls scopeVariables', function () {
             sinon.spy(sjedon, 'scopeVariables')
 
-            new Sjedon.StackFrame(sjedon, a, null)
+            new Sjedon.StackFrame({
+                sjedon: sjedon,
+                ast: a,
+                parent: null
+            })
 
             ok(sjedon.scopeVariables.calledOnce)
             ok(sjedon.scopeVariables.calledWith(a))
