@@ -28,6 +28,9 @@ function evalExpr(expr) {
     var sjedon = new Sjedon(esprima.parse(expr));
     return sjedon.evalExpression(sjedon.ast.body[0].expression);
 }
+function evalStatements(s) {
+    return evalExpr('(function(){\n'+s+'\n}())');
+}
 
 describe('code:', function () {
     describe('literals:', function () {
@@ -59,6 +62,14 @@ describe('code:', function () {
         ok.strictEqual(evalExpr('1 ? 2 : 3'), 2)
         ok.strictEqual(evalExpr('0 ? 2 : 3'), 3)
     });
+    it('conditionals', function () {
+        ok.strictEqual(evalStatements('if (1) {return 1}'), 1)
+        ok.strictEqual(evalStatements('if (0) {return 1} return 0'), 0)
+        ok.strictEqual(evalStatements('if (0) {return 1} else { return 0 }'), 0)
+        ok.strictEqual(evalStatements('if (1) {return 1} else { return 0 }'), 1)
+        ok.strictEqual(evalStatements('if (1) return 1'), 1)
+        ok.strictEqual(evalStatements('if (0) return 1; return 0'), 0)
+    });
 })
 
 describe('functions', function () {
@@ -85,6 +96,11 @@ describe('functions', function () {
         ok.equal(result, undefined);
         ok.equal(typeof result, 'undefined');
     })
+    it('still return when not the only statement', function () {
+        var emptyReturn = aSjedon('(function () { ; return 1; })');
+        var result = emptyReturn.callFunction(emptyReturn.ast.body[0].expression);
+        ok.equal(result, 1);
+    })
     describe('calling functions', function () {
         it('cause StackFrame\'s to be constructed.', function () {
             var fakeStackFrame = {fake: 'stackframe'};
@@ -101,6 +117,8 @@ describe('functions', function () {
         })
     })
 })
+
+return;
 
 describe('var scope:', function () {
     var sjedon
