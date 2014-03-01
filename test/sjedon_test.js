@@ -55,6 +55,10 @@ describe('code:', function () {
             ok.strictEqual(evalExpr('void {}', undefined));
         })
     });
+    it('ternaries', function () {
+        ok.strictEqual(evalExpr('1 ? 2 : 3'), 2)
+        ok.strictEqual(evalExpr('0 ? 2 : 3'), 3)
+    });
 })
 
 describe('functions', function () {

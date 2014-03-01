@@ -26,9 +26,6 @@ module.exports = function (grunt) {
       },
       lib: {
         src: ['lib/**/*.js']
-      },
-      test: {
-        src: ['test/**/*.js']
       }
     },
     watch: {
@@ -36,13 +33,17 @@ module.exports = function (grunt) {
         files: '<%= jshint.gruntfile.src %>',
         tasks: ['jshint:gruntfile']
       },
-      lib: {
-        files: '<%= jshint.lib.src %>',
-        tasks: ['jshint:lib', 'simplemocha']
+      jshint: {
+        files: [
+          '<%= jshint.test.src %>', 
+          '<%= jshint.lib.src %>',
+          '<%= jshint.gruntfile.src %>']
       },
-      test: {
-        files: '<%= jshint.test.src %>',
-        tasks: ['jshint:test', 'simplemocha']
+      simplemocha: {
+        files: [
+          '<%= jshint.test.src %>',
+          '<%= jshint.lib.src %>'],
+        tasks: ['simplemocha']
       }
     }
   });
