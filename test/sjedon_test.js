@@ -70,6 +70,29 @@ describe('code:', function () {
         ok.strictEqual(evalStatements('if (1) return 1'), 1)
         ok.strictEqual(evalStatements('if (0) return 1; return 0'), 0)
     });
+    describe('switches', function () {
+        it('(empty switch)', function () {
+            ok.strictEqual(evalStatements('switch(42){}'), undefined);
+        });
+        it('skip cases which aren\'t tripe-equal', function () {
+            ok(evalStatements('switch(3){case "3":return false; case 3: return true;}'));
+        });
+        it('can have return statements inside', function () {
+            ok(evalStatements('switch(3){case 3: return true; }return false;'));
+        });
+        it('are breakable', function () {
+            ok.equal(evalStatements('switch(3){case 3: break; return false};'), undefined);
+        });
+        it('(fall-through)', function () {
+            ok.equal(evalStatements('switch(3){case 3: case 4: return true};'), true);
+            ok.equal(evalStatements('switch(3){case 3: default: return true};'), true);
+        });
+        it('have a default label, which is where control flow goes by default', function () {
+            ok(evalStatements('switch(42){default: return true; }return false;'));
+            ok(evalStatements('switch(42){case 3: default: return true; }return false;'));
+        });
+    });
+    // TODO labeled break (?)
 })
 
 describe('functions', function () {
