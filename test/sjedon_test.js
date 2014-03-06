@@ -125,23 +125,16 @@ describe('functions', function () {
         ok.equal(result, 1);
     })
     describe('calling functions', function () {
-        it('cause StackFrame\'s to be constructed.', function () {
+        it('cause StackFrame\'s to be constructed.', sinon.test(function () {
             var fakeStackFrame = {fake: 'stackframe'};
-            var spy = sinon.stub(Sjedon, 'StackFrame').returns(fakeStackFrame);
+            var spy = this.stub(Sjedon, 'StackFrame').returns(fakeStackFrame);
 
             func.callFunction(funcAST);
-
-            try {
-                ok(spy.calledOnce)
-                ok(spy.calledWithNew())
-            } finally {
-                spy.restore();
-            }
-        })
+            ok(spy.calledOnce)
+            ok(spy.calledWithNew())
+        }))
     })
 })
-
-return;
 
 describe('var scope:', function () {
     var sjedon
@@ -192,6 +185,7 @@ describe('StackFrame', function () {
         sjedon = aSjedon('' +
             'var globVar; \n' +
             function a() {
+                /* jshint unused:false */
                 var x
                 b();
             } +
@@ -204,7 +198,7 @@ describe('StackFrame', function () {
             'a();')
         a = sjedon.ast.body[1]
         b = sjedon.ast.body[2]
-        ok(a), ok(b)
+        ok(a); ok(b)
         globalFrame = new Sjedon.StackFrame({
             sjedon: sjedon,
             ast: sjedon.ast,
@@ -279,7 +273,7 @@ describe('StackFrame', function () {
             ok(trace[1].frame === aFrame)
             ok(trace[2].frame === bFrame)
         })
-        it('the bottom stack frame has an alias in the Sjedon instance', function () {
+        it('the Sjedon instance just calls the trace function in the bottom stack', function () {
             ok('currentFrame' in sjedon)
             sjedon.currentFrame = { trace: sinon.stub().returns(123) }
             ok.equal(sjedon.trace(), 123)
@@ -287,14 +281,21 @@ describe('StackFrame', function () {
         })
     })
     describe('running a function', function () {
-        it('assignments occur', function () {
-            var stub
-            sinon.stub(Sjedon, 'StackFrame')
-                .returns((stub = { assignVar: sinon.stub() }))
+        it('assignments occur', sinon.test(function () {
+            var OriginalStackFrame = Sjedon.StackFrame
+            var mockFrame
+            this.stub(Sjedon, 'StackFrame', function (opts) {
+                ok.equal(arguments.length, 1, 'sanity check');
+                mockFrame = new OriginalStackFrame(opts);
+                mockFrame.assignVar = sinon.stub()
+                return mockFrame
+            })
             sjedon.runFunction(b)
-            ok(stub.assignVar.calledOnce)
-            ok.deepEqual(stub.assignVar.lastCall.args, ['y', 3])
-        })
+            ok(Sjedon.StackFrame.calledOnce, 'StackFrame got created');
+            ok(mockFrame.assignVar.called, 'assignVar() called')
+            ok(mockFrame.assignVar.calledOnce, 'assignVar() called only once')
+            ok.deepEqual(mockFrame.assignVar.lastCall.args, ['y', 3], 'assignVar() called with ("y", 3)')
+        }))
     })
 })
 
