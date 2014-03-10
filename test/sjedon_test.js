@@ -299,3 +299,21 @@ describe('StackFrame', function () {
     })
 })
 
+describe('"Native" global objects', function () {
+    it('are fed through the "global" option to Sjedon', function () {
+        var sjedon = new Sjedon(esprima.parse('(function(){return TESTING;}())'), { global: { TESTING: '1234' }});
+        ok.equal(sjedon.evalExpression(sjedon.ast.body[0].expression), '1234')
+    });
+    describe('', function () {
+        var sjedon
+        beforeEach(function () {
+            var globalContext = {
+                foo: 'foo',
+                bar: 342,
+                baz: function () { return 'baz'; }
+            }
+            sjedon = new Sjedon({ global: globalContext })
+        });
+    });
+});
+
