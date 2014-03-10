@@ -229,22 +229,22 @@ describe('StackFrame', function () {
             ok(sjedon.scopeVariables.calledOnce)
             ok(sjedon.scopeVariables.calledWith(a))
         })
-        it('starts with an object with "!" + variables as keys', function () {
+        it('starts with an object with variables as keys', function () {
             ok.deepEqual(globalFrame.variables, {
-                "!globVar": undefined,
-                "!a": undefined,
-                "!b": undefined
+                "globVar": undefined,
+                "a": undefined,
+                "b": undefined
             })
 
             ok.deepEqual(bFrame.variables, {
-                '!arguments': undefined,
-                '!y': undefined
+                'arguments': undefined,
+                'y': undefined
             })
         })
     })
     describe('variables', function () {
         beforeEach(function () {
-            globalFrame.variables['!someValue'] = 'someValue'
+            globalFrame.variables['someValue'] = 'someValue'
         })
         it('can be fetched', function () {
             ok.equal(aFrame.fetchVar('x'), undefined)
