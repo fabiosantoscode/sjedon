@@ -281,10 +281,10 @@ describe('StackFrame', function () {
         })
     })
     describe('running a function', function () {
-        it('assignments occur', sinon.test(function () {
+        it('assignments occur', function () {
             var OriginalStackFrame = Sjedon.StackFrame
             var mockFrame
-            this.stub(Sjedon, 'StackFrame', function (opts) {
+            sinon.stub(Sjedon, 'StackFrame', function (opts) {
                 ok.equal(arguments.length, 1, 'sanity check');
                 mockFrame = new OriginalStackFrame(opts);
                 mockFrame.assignVar = sinon.stub()
@@ -295,7 +295,8 @@ describe('StackFrame', function () {
             ok(mockFrame.assignVar.called, 'assignVar() called')
             ok(mockFrame.assignVar.calledOnce, 'assignVar() called only once')
             ok.deepEqual(mockFrame.assignVar.lastCall.args, ['y', 3], 'assignVar() called with ("y", 3)')
-        }))
+            Sjedon.StackFrame.restore();
+        })
     })
 })
 
@@ -304,16 +305,35 @@ describe('"Native" global objects', function () {
         var sjedon = new Sjedon(esprima.parse('(function(){return TESTING;}())'), { global: { TESTING: '1234' }});
         ok.equal(sjedon.evalExpression(sjedon.ast.body[0].expression), '1234')
     });
-    describe('', function () {
-        var sjedon
-        beforeEach(function () {
-            var globalContext = {
-                foo: 'foo',
-                bar: 342,
-                baz: function () { return 'baz'; }
-            }
-            sjedon = new Sjedon({ global: globalContext })
-        });
+
+    it('can be used for user callbacks', function () {
+        var toCall
+        var global = { userFunc: sinon.spy() }
+        var sjedon = new Sjedon(esprima.parse('userFunc()'),
+            {global: global})
+        sjedon.run();
+        ok(global.userFunc.calledOnce, 'user callback was called from inside Sjedon');
     });
+
+    /*
+    TODO do this when functions in Sjedon can receive arguments
+    it('can receive arguments', function () {
+        var toCall
+        var sjedon = new Sjedon(esprima.parse(
+            'var x;'+
+            'setTimeout(function(v){ x = v }, 10)'), {
+                global: {
+                    setTimeout: function(cb, ms){
+                        toCall=cb;
+                        ok.equal(ms, 10)
+                    }
+                }
+            });
+        sjedon.run();
+        ok.equal(sjedon.fetchVar('x'), undefined);
+        toCall(6);
+        ok.equal(sjedon.fetchVar('x'), 6);
+    });
+    */
 });
 
