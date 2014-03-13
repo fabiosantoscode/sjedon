@@ -307,7 +307,6 @@ describe('"Native" global objects', function () {
     });
 
     it('can be used for user callbacks', function () {
-        var toCall
         var global = { userFunc: sinon.spy() }
         var sjedon = new Sjedon(esprima.parse('userFunc()'),
             {global: global})
