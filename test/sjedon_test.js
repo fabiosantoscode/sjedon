@@ -95,6 +95,16 @@ describe('code:', function () {
     // TODO labeled break (?)
 })
 
+describe('property access', function () {
+    var obj = '({ a: 1, 2: 2 })';
+
+    it('; The in operator returns a boolean indicating whether the property is present in the object', function () {
+        ok.equal(evalExpr('"a" in ' + obj), true, 'object should contain "a"');
+        ok.equal(evalExpr('2 in ' + obj), true, 'numbers work too. the object contains 2 but this is implicitly converted to "2"');
+        ok.equal(evalExpr('"2" in ' + obj), true, 'numbers work too. the object contains 2 but this is implicitly converted to "2" (cont)');
+    });
+});
+
 describe('functions', function () {
     var simpleFunc, simpleFuncAST
     var func, funcAST
@@ -120,10 +130,23 @@ describe('functions', function () {
         ok.equal(typeof result, 'undefined');
     })
     it('still return when not the only statement', function () {
-        var emptyReturn = aSjedon('(function () { ; return 1; })');
+        var emptyReturn = aSjedon('(function () { /* empty statement */; return 1; })');
         var result = emptyReturn.callFunction(emptyReturn.ast.body[0].expression);
         ok.equal(result, 1);
     })
+    xit('have a length. its length is the number of arguments they accept (sorry, specs)', function () {});
+    describe('arguments', function () {
+        xit('are passed as an "arguments" pseudo-array.', function () {}); // TODO
+        xit('are accessible as variables too', function () {}); // TODO
+        describe('(arguments objects)', function () {
+            xit('have a length equal to the length of arguments called'); // TODO
+            xit('have a "callee", which is the function itself'); // TODO
+        });
+    })
+    describe('this', function() {
+        xit('is set to the object the function was called as a property of', function () {}); // TODO
+        xit('is set to null when the function wasn\'t called as a property of anything', function () {}); // TODO
+    });
     describe('calling functions', function () {
         it('cause StackFrame\'s to be constructed.', sinon.test(function () {
             var fakeStackFrame = {fake: 'stackframe'};
