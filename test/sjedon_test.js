@@ -143,9 +143,13 @@ describe('functions', function () {
     xit('have a length. its length is the number of arguments they accept (sorry, specs)', function () {});
     describe('arguments', function () {
         xit('are passed as an "arguments" pseudo-array.', function () {}); // TODO
-        xit('are accessible as variables too', function () {}); // TODO
+        it('are accessible as variables', function () {
+            var funcWithArgs = aSjedon('(function (a,b,c) { return a; })');
+            var result = funcWithArgs.callFunction(funcWithArgs.ast.body[0].expression, null, [ 2 ]);
+            ok.strictEqual(result, 2);
+        });
         describe('(arguments objects)', function () {
-            xit('have a length equal to the length of arguments called'); // TODO
+            xit('have a length equal to the length of arguments used in the call'); // TODO
             xit('have a "callee", which is the function itself'); // TODO
         });
     })
