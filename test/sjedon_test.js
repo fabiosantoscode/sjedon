@@ -95,13 +95,19 @@ describe('code:', function () {
     // TODO labeled break (?)
 })
 
-describe('property access', function () {
+describe('property access:', function () {
     var obj = '({ a: 1, 2: 2 })';
 
-    it('; The in operator returns a boolean indicating whether the property is present in the object', function () {
+    it('The in operator returns a boolean indicating whether the property is present in the object', function () {
         ok.equal(evalExpr('"a" in ' + obj), true, 'object should contain "a"');
         ok.equal(evalExpr('2 in ' + obj), true, 'numbers work too. the object contains 2 but this is implicitly converted to "2"');
         ok.equal(evalExpr('"2" in ' + obj), true, 'numbers work too. the object contains 2 but this is implicitly converted to "2" (cont)');
+    });
+
+    it('Properties of objects can be accessed', function () {
+        ok.equal(evalExpr(obj + '.a'), 1, 'dotted access');
+        ok.equal(evalExpr(obj + '[2]'), 2, 'accessed to a number property');
+        ok.equal(evalExpr(obj + '["2"]'), 2, 'accessed to a number property as a string');
     });
 });
 
