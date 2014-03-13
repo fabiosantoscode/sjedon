@@ -351,13 +351,15 @@ describe('"Native" objects', function () {
         ok.deepEqual(global.userFunc.lastCall.args, [1, 2, '3'])
     });
 
-    xit('... which can be called themselves because they are wrapped', function () {
+    it('... which can be called themselves because they are wrapped', function () {
         var sjedon = new Sjedon(esprima.parse(
-            'userFunc(function(v){ return v + 1 })'), {
+            'userFunc(function(v){ return v })'), {
                 global: global });
         
         sjedon.run();
-        // TODO Get the argument passed to userFunc spy, assert it has typeof function, returns 3 + 1
+        var wrappedFunc = global.userFunc.lastCall.args[0];
+        ok.equal(typeof wrappedFunc, 'function');
+        ok.equal(wrappedFunc(3), 3);
     }); // TODO
 });
 
