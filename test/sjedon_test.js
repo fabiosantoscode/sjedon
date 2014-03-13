@@ -333,39 +333,31 @@ describe('StackFrame', function () {
     })
 })
 
-describe('"Native" global objects', function () {
+describe('"Native" objects', function () {
+    var global
+    beforeEach(function () {
+        global = { userFunc: sinon.spy(), TESTING: '1234' }
+    });
     it('are fed through the "global" option to Sjedon', function () {
-        var sjedon = new Sjedon(esprima.parse('(function(){return TESTING;}())'), { global: { TESTING: '1234' }});
+        var sjedon = new Sjedon(esprima.parse('(function(){return TESTING;}())'), {
+            global: global });
         ok.equal(sjedon.evalExpression(sjedon.ast.body[0].expression), '1234')
     });
 
     it('can be used for user callbacks', function () {
-        var global = { userFunc: sinon.spy() }
-        var sjedon = new Sjedon(esprima.parse('userFunc()'),
-            {global: global})
+        var sjedon = new Sjedon(esprima.parse('userFunc(1, 2, "3")'), {global: global})
         sjedon.run();
         ok(global.userFunc.calledOnce, 'user callback was called from inside Sjedon');
+        ok.deepEqual(global.userFunc.lastCall.args, [1, 2, '3'])
     });
 
-    /*
-    TODO do this when functions in Sjedon can receive arguments
-    it('can receive arguments', function () {
-        var toCall
+    xit('... which can be called themselves because they are wrapped', function () {
         var sjedon = new Sjedon(esprima.parse(
-            'var x;'+
-            'setTimeout(function(v){ x = v }, 10)'), {
-                global: {
-                    setTimeout: function(cb, ms){
-                        toCall=cb;
-                        ok.equal(ms, 10)
-                    }
-                }
-            });
+            'userFunc(function(v){ return v + 1 })'), {
+                global: global });
+        
         sjedon.run();
-        ok.equal(sjedon.fetchVar('x'), undefined);
-        toCall(6);
-        ok.equal(sjedon.fetchVar('x'), 6);
-    });
-    */
+        // TODO Get the argument passed to userFunc spy, assert it has typeof function, returns 3 + 1
+    }); // TODO
 });
 
