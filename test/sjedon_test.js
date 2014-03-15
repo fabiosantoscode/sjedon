@@ -74,7 +74,7 @@ describe('code:', function () {
         it('(empty switch)', function () {
             ok.strictEqual(evalStatements('switch(42){}'), undefined);
         });
-        it('skip cases which aren\'t tripe-equal', function () {
+        it('skip cases which aren\'t triple-equal', function () {
             ok(evalStatements('switch(3){case "3":return false; case 3: return true;}'));
         });
         it('can have return statements inside', function () {
@@ -140,7 +140,12 @@ describe('functions', function () {
         var result = emptyReturn.callFunction(emptyReturn.ast.body[0].expression);
         ok.equal(result, 1);
     })
-    xit('have a length. its length is the number of arguments they accept (sorry, specs)', function () {});
+    it('have a length. its length is the number of parameters (sorry, specs)', function () {
+        var length0 = evalExpr('(function () {}).length');
+        ok.equal(length0, 0);
+        var length1 = evalExpr('(function (a) {}).length');
+        ok.equal(length1, 1);
+    });
     describe('arguments', function () {
         xit('are passed as an "arguments" pseudo-array.', function () {}); // TODO
         it('are accessible as variables', function () {
