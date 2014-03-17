@@ -147,7 +147,15 @@ describe('functions', function () {
         ok.equal(length1, 1);
     });
     describe('arguments', function () {
-        xit('are passed as an "arguments" pseudo-array.', function () {}); // TODO
+        it('are passed as an "arguments" pseudo-array.', function () {
+            var args = evalExpr('(function(a,b,c){ return arguments })(1,2);');
+            ok(args);
+            ok.equal(typeof args, 'object');
+            ok.equal(args.length, 2);
+            ok.equal(args[0], 1);
+            ok.equal(args[1], 2);
+            ok(!args.splice);
+        });
         it('are accessible as variables', function () {
             var funcWithArgs = aSjedon('(function (a,b,c) { return a; })');
             var result = funcWithArgs.callFunction(funcWithArgs.ast.body[0].expression, null, [ 2 ]);
