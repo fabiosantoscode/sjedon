@@ -128,11 +128,9 @@ describe('functions', function () {
     it('return undefined by default', function () {
         var emptyReturn = aSjedon('(function () { return; })');
         var result = emptyReturn.callFunction(emptyReturn.ast.body[0].expression);
-        ok.equal(result, undefined);
         ok.equal(typeof result, 'undefined');
 
         result = simpleFunc.callFunction(simpleFuncAST);
-        ok.equal(result, undefined);
         ok.equal(typeof result, 'undefined');
     })
     it('still return when not the only statement', function () {
@@ -147,23 +145,27 @@ describe('functions', function () {
         ok.equal(length1, 1);
     });
     describe('arguments', function () {
-        it('are passed as an "arguments" pseudo-array.', function () {
-            var args = evalExpr('(function(a,b,c){ return arguments })(1,2);');
-            ok(args);
-            ok.equal(typeof args, 'object');
-            ok.equal(args.length, 2);
-            ok.equal(args[0], 1);
-            ok.equal(args[1], 2);
-            ok(!args.splice);
-        });
         it('are accessible as variables', function () {
             var funcWithArgs = aSjedon('(function (a,b,c) { return a; })');
             var result = funcWithArgs.callFunction(funcWithArgs.ast.body[0].expression, null, [ 2 ]);
             ok.strictEqual(result, 2);
         });
         describe('(arguments objects)', function () {
-            xit('have a length equal to the length of arguments used in the call'); // TODO
-            xit('have a "callee", which is the function itself'); // TODO
+            var args;
+            beforeEach(function() {
+                args = evalExpr('(function(a,b,c){ return arguments })(1,2);');
+            });
+            it('are passed as an "arguments" pseudo-array.', function () {
+                ok(args);
+                ok.equal(typeof args, 'object');
+                ok.equal(args.length, 2);
+                ok.equal(args[0], 1);
+                ok.equal(args[1], 2);
+                ok(!args.splice);
+            });
+            it('have a length equal to the length of arguments used in the call', function () {
+                ok.equal(args.length, 2);
+            });
         });
     })
     describe('this', function() {
