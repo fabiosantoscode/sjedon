@@ -115,6 +115,11 @@ describe('property access:', function () {
         ok.equal(evalExpr(obj + '[2]'), 2, 'accessed to a number property');
         ok.equal(evalExpr(obj + '["2"]'), 2, 'accessed to a number property as a string');
     });
+
+    it('Properties of objects can be modified', function () {
+        ok.deepEqual(evalStatements('var a = ' + obj + '; a["a"] = 1; a["a"] = 0; return a;'),
+            { a: 0, 2: 2 });
+    });
 });
 
 describe('functions', function () {
@@ -371,7 +376,9 @@ describe('StackFrame', function () {
             ok(Sjedon.StackFrame.calledOnce, 'StackFrame got created');
             ok(mockFrame.assignVar.called, 'assignVar() called')
             ok(mockFrame.assignVar.calledOnce, 'assignVar() called only once')
-            ok.deepEqual(mockFrame.assignVar.lastCall.args, ['y', 3], 'assignVar() called with ("y", 3)')
+            ok.deepEqual(mockFrame.assignVar.lastCall.args,
+                [{ type: "Identifier", name: 'y' }, 3],
+                'assignVar() called with ({type: "Identifier", name: "y"}, 3)')
             Sjedon.StackFrame.restore();
         })
     })
