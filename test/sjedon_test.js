@@ -150,6 +150,19 @@ describe('functions', function () {
             var result = funcWithArgs.callFunction(funcWithArgs.ast.body[0].expression, null, [ 2 ]);
             ok.strictEqual(result, 2);
         });
+        it('when too few arguments are passed, they are set as undefined', function () {
+            var func = '(function (a, b, c) { return [a, b, c]; })'
+            ok.deepEqual(
+                evalExpr(func + '(1);'),
+                [1, undefined, undefined], 'when part of the arguments passed');
+            ok.deepEqual(
+                evalExpr(func + '();'),
+                [undefined, undefined, undefined], 'no arguments passed');
+        });
+        it('when too many arguments are passed, they don\'t crash sjedon (regression)', function () {
+            ok(evalExpr('(function(a){ return 1 })(1, 2, 3)'), 'the function takes one argument');
+            ok(evalExpr('(function(){ return 1 })(1, 2, 3)'), 'the function takes no arguments');
+        });
         describe('(arguments objects)', function () {
             var args;
             beforeEach(function() {
@@ -375,6 +388,6 @@ describe('"Native" objects', function () {
         var wrappedFunc = global.userFunc.lastCall.args[0];
         ok.equal(typeof wrappedFunc, 'function');
         ok.equal(wrappedFunc(3), 3);
-    }); // TODO
+    });
 });
 
