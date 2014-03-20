@@ -24,8 +24,8 @@ function aSjedon(ast) {
     }
     return new Sjedon(ast);
 }
-function evalExpr(expr) {
-    var sjedon = new Sjedon(esprima.parse(expr));
+function evalExpr(expr, global) {
+    var sjedon = new Sjedon(esprima.parse(expr), { global: global });
     return sjedon.evalExpression(sjedon.ast.body[0].expression);
 }
 function evalStatements(s) {
@@ -56,6 +56,13 @@ describe('code:', function () {
             ok.equal(evalExpr('1*1'), 1);
             ok.equal(evalExpr('1/2'), 0.5);
             ok.equal(evalExpr('1-1'), 0);
+        });
+        it('prefix, postfix (increment/decrement) operators', function () {
+            var global = function () { return { i: 0 } }
+            ok.deepEqual(evalExpr('[i++, i]', global()), [ 0, 1])
+            ok.deepEqual(evalExpr('[i--, i]', global()), [ 0,-1])
+            ok.deepEqual(evalExpr('[++i, i]', global()), [ 1, 1])
+            ok.deepEqual(evalExpr('[--i, i]', global()), [-1,-1])
         });
     });
     describe('unary operators', function () {
@@ -119,6 +126,14 @@ describe('property access:', function () {
     it('Properties of objects can be modified', function () {
         ok.deepEqual(evalStatements('var a = ' + obj + '; a["a"] = 1; a["a"] = 0; return a;'),
             { a: 0, 2: 2 });
+    });
+
+    it('Properties of objects can be incremented, decremented, using the prefix/postfix operators', function () {
+        var global = function () { return { foo: { bar: 0 } } };
+        ok.deepEqual(evalExpr('[foo.bar++, foo.bar]', global()), [ 0 ,  1])
+        ok.deepEqual(evalExpr('[foo.bar--, foo.bar]', global()), [ 0 , -1])
+        ok.deepEqual(evalExpr('[++foo.bar, foo.bar]', global()), [ 1 ,  1])
+        ok.deepEqual(evalExpr('[--foo.bar, foo.bar]', global()), [-1 , -1])
     });
 });
 
@@ -377,7 +392,7 @@ describe('StackFrame', function () {
             ok(mockFrame.assignVar.called, 'assignVar() called')
             ok(mockFrame.assignVar.calledOnce, 'assignVar() called only once')
             ok.deepEqual(mockFrame.assignVar.lastCall.args,
-                [{ type: "Identifier", name: 'y' }, 3],
+                ['y', 3],
                 'assignVar() called with ({type: "Identifier", name: "y"}, 3)')
             Sjedon.StackFrame.restore();
         })
