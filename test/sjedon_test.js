@@ -28,8 +28,8 @@ function evalExpr(expr, global) {
     var sjedon = new Sjedon(esprima.parse(expr), { global: global });
     return sjedon.evalExpression(sjedon.ast.body[0].expression);
 }
-function evalStatements(s) {
-    return evalExpr('(function(){\n'+s+'\n}())');
+function evalStatements(s, global) {
+    return evalExpr('(function(){\n'+s+'\n}())', global);
 }
 
 describe('code:', function () {
@@ -105,7 +105,19 @@ describe('code:', function () {
             ok(evalStatements('switch(42){case 3: default: return true; }return false;'));
         });
     });
-    // TODO labeled break (?)
+    describe('loops', function () {
+        it('(for loop)', function () {
+            var spy = sinon.spy();
+            evalStatements(
+                'for(var i = 0; i < 3; i++) { spy(i) }',
+                { spy: spy })
+            ok(spy.called);
+            ok(spy.calledThrice);
+            ok(spy.firstCall.args, [0]);
+            ok(spy.secondCall.args, [1]);
+            ok(spy.thirdCall.args, [2]);
+        });
+    });
 })
 
 describe('property access:', function () {
