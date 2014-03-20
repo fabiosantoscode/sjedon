@@ -51,6 +51,12 @@ describe('code:', function () {
         it('comma', function () {
             ok.equal(evalExpr('1,2,3'), 3);
         });
+        it('math binOps', function () {
+            ok.equal(evalExpr('1+1'), 2);
+            ok.equal(evalExpr('1*1'), 1);
+            ok.equal(evalExpr('1/2'), 0.5);
+            ok.equal(evalExpr('1-1'), 0);
+        });
     });
     describe('unary operators', function () {
         it('void', function () {
