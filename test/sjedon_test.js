@@ -179,6 +179,16 @@ describe('functions', function () {
             it('have a length equal to the length of arguments used in the call', function () {
                 ok.equal(args.length, 2);
             });
+            it('... even if these arguments are too many', function () {
+                ok.equal(
+                    evalExpr('(function () { return arguments; }(1,2,3)).length'),
+                    3,
+                    'function had no parameters');
+                ok.equal(
+                    evalExpr('(function (a) { return arguments; }(1,2,3)).length'),
+                    3,
+                    'function had one parameter');
+            });
         });
     })
     describe('this', function() {
