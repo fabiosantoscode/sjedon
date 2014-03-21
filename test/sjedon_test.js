@@ -106,17 +106,33 @@ describe('code:', function () {
         });
     });
     describe('loops', function () {
-        it('(for loop)', function () {
-            var spy = sinon.spy();
-            evalStatements(
-                'for(var i = 0; i < 3; i++) { spy(i) }',
-                { spy: spy })
+        var spy;
+        var global;
+        beforeEach(function () {
+            spy = sinon.spy();
+            global = { spy: spy };
+        });
+        function spyCalledThriceWith012(spy) {
             ok(spy.called);
             ok(spy.calledThrice);
-            ok(spy.firstCall.args, [0]);
-            ok(spy.secondCall.args, [1]);
-            ok(spy.thirdCall.args, [2]);
+            ok.deepEqual(spy.firstCall.args, [0]);
+            ok.deepEqual(spy.secondCall.args, [1]);
+            ok.deepEqual(spy.thirdCall.args, [2]);
+        }
+        it('(for loop)', function () {
+            evalStatements(
+                'for(var i = 0; i < 3; i++) { spy(i) }',
+                global)
+            spyCalledThriceWith012(spy);
         });
+        it('(while loop)', function () {
+            evalStatements(
+                'var i = 0 - 1; while(i++ < 2) { spy(i); }', global)
+            spyCalledThriceWith012(spy);
+        });
+        xit('(do while loop)', function () {
+        });
+        it('', process.exit)
     });
 })
 
