@@ -296,7 +296,10 @@ describe('functions', function () {
             evalExpr('obj[2]()', global);
             ok(spy.lastCall.thisValue === obj, 'object is the same');
         });
-        xit('is set to null when the function wasn\'t called as a property of anything', function () {}); // TODO
+        it('is set to undefined when the function wasn\'t called as a property of anything', function () {
+            evalExpr('spy()', global);
+            ok.strictEqual(spy.lastCall.thisValue, undefined);
+        });
     });
     describe('calling functions', function () {
         it('cause StackFrame\'s to be constructed.', sinon.test(function () {
