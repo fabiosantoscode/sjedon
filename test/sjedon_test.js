@@ -178,6 +178,8 @@ describe('property access:', function () {
         ok.equal(evalExpr(obj + '[2]'), 2, 'accessed to a number property');
         ok.equal(evalExpr(obj + '["2"]'), 2, 'accessed to a number property as a string');
         ok.equal(evalExpr(obj + '[1 + 1]'), 2, 'computed property access');
+        ok.equal(evalExpr(obj + '[asd]', { asd: 2}), 2, 'accessing through a variable');
+        ok.equal(evalExpr(obj + '.asd', { asd: 2}), undefined, 'accessing a property which happens to be a variable name');
     });
 
     it('Properties of objects can be modified', function () {
