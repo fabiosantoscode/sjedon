@@ -119,18 +119,47 @@ describe('code:', function () {
             ok.deepEqual(spy.secondCall.args, [1]);
             ok.deepEqual(spy.thirdCall.args, [2]);
         }
-        it('(for loop)', function () {
-            evalStatements(
-                'for(var i = 0; i < 3; i++) { spy(i) }',
-                global)
-            spyCalledThriceWith012(spy);
+        describe('(for loop)', function () {
+            it('loops', function () {
+                evalStatements(
+                    'for(var i = 0; i < 3; i++) { spy(i) }',
+                    global)
+                spyCalledThriceWith012(spy);
+            });
+            it('is breakable', function () {
+                evalStatements(
+                    'for(;;){ spy(); break; }', global);
+                ok(spy.calledOnce);
+            });
         });
-        it('(while loop)', function () {
-            evalStatements(
-                'var i = 0 - 1; while(i++ < 2) { spy(i); }', global)
-            spyCalledThriceWith012(spy);
+        describe('(while loop)', function() {
+            it('loops', function () {
+                evalStatements(
+                    'while(i++ < 2) { spy(i); }', { spy: spy, i: -1 })
+                spyCalledThriceWith012(spy);
+            });
+            it('is breakable', function () {
+                evalStatements(
+                    'while(true) { spy(); break; }', global);
+                ok(spy.calledOnce);
+            });
         });
-        xit('(do while loop)', function () {
+        describe('(while loop)', function() {
+            it('loops', function () {
+                evalStatements(
+                    'do { spy(i); i++; } while(i < 3)', { spy: spy, i: 0 })
+                spyCalledThriceWith012(spy);
+            });
+            it('body is executed once even if the condition is false', function () {
+                evalStatements(
+                    'do { spy(); } while (0)', global);
+                ok(spy.calledOnce)
+            });
+            it('is breakable', function () {
+                evalStatements(
+                    'do { spy(); break; } while (1)', global);
+                ok(spy.calledOnce)
+            });
         });
     });
 })
