@@ -177,6 +177,7 @@ describe('property access:', function () {
         ok.equal(evalExpr(obj + '.a'), 1, 'dotted access');
         ok.equal(evalExpr(obj + '[2]'), 2, 'accessed to a number property');
         ok.equal(evalExpr(obj + '["2"]'), 2, 'accessed to a number property as a string');
+        ok.equal(evalExpr(obj + '[1 + 1]'), 2, 'computed property access');
     });
 
     it('Properties of objects can be modified', function () {
