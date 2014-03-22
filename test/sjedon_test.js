@@ -274,7 +274,25 @@ describe('functions', function () {
         });
     })
     describe('this', function() {
-        xit('is set to the object the function was called as a property of', function () {}); // TODO
+        var global;
+        var obj;
+        var spy;
+        beforeEach(function () {
+            spy = sinon.spy()
+            obj = { spy: spy, 2: spy }
+            global = { spy: spy, obj: obj  }
+        });
+        it('is set to the object the function was called as a property of', function () {
+            evalExpr('obj.spy()', global);
+            ok(spy.calledOnce, 'sanity check -- spy is called');
+            ok(spy.lastCall.thisValue === obj, 'object is the same');
+        });
+        it('trying to access the function with a string or a number.', function () {
+            evalExpr('obj["spy"]()', global);
+            ok(spy.lastCall.thisValue === obj, 'object is the same');
+            evalExpr('obj[2]()', global);
+            ok(spy.lastCall.thisValue === obj, 'object is the same');
+        });
         xit('is set to null when the function wasn\'t called as a property of anything', function () {}); // TODO
     });
     describe('calling functions', function () {
