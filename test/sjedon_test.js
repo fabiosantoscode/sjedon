@@ -70,6 +70,24 @@ describe('code:', function () {
             ok.strictEqual(evalExpr('void 1', undefined));
             ok.strictEqual(evalExpr('void {}', undefined));
         })
+        // TODO delete
+        // TODO typeof
+        it('+', function () {
+            ok.strictEqual(evalExpr('+"1"'), 1);
+            ok.strictEqual(evalExpr('+1'), 1);
+        });
+        it('-', function () {
+            ok.strictEqual(evalExpr('-"1"'), -1);
+            ok.strictEqual(evalExpr('-1'), -1);
+        });
+        it('bitwise not (~)', function () {
+            ok.strictEqual(evalExpr('~-1'), 0);
+            ok.strictEqual(evalExpr('~0'), -1);
+        });
+        it('logical not (!)', function () {
+            ok.strictEqual(evalExpr('!1'), false);
+            ok.strictEqual(evalExpr('!0'), true);
+        });
     });
     it('ternaries', function () {
         ok.strictEqual(evalExpr('1 ? 2 : 3'), 2)
