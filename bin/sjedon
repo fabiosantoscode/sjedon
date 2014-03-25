@@ -7,34 +7,55 @@ var Sjedon = require('../lib/sjedon.js');
 
 var sjedon = new Sjedon(esprima.parse(''));
 
-var repl = new repl.REPLServer({
-    prompt: 'sjedon> ',
-    eval: sjedonReplEval
-});
+function runRepl() {
+    new repl.REPLServer({
+        prompt: 'sjedon> ',
+        eval: sjedonReplEval
+    });
 
-function sjedonReplEval(x, _, __, done) {
-    try {
-        sjedon.ast = esprima.parse(x);
-    } catch(e) {
-        // The REPL will try to give me the whole thing between parens.
-        // Not sure why yet.
-        if (x[0] === '(') {
-            x = x.replace(/^\(/, '').replace(/\)$/, '');
-            return sjedonReplEval.apply(this, [x].concat([].slice.call(arguments, 1)));
+    function sjedonReplEval(x, _, __, done) {
+        try {
+            sjedon.ast = esprima.parse(x);
+        } catch(e) {
+            // The REPL will try to give me the whole thing between parens.
+            // Not sure why yet.
+            if (x[0] === '(') {
+                x = x.replace(/^\(/, '').replace(/\)$/, '');
+                return sjedonReplEval.apply(this, [x].concat([].slice.call(arguments, 1)));
+            }
+            return done(null, e);
         }
-        return done(null, e);
-    }
 
-    try {
-        if (x[0] === '(' && sjedon.ast.body[0].type === 'ExpressionStatement') {
-            // It's an expression, so eval it and show the result.
-            return done(null, sjedon.evalExpression(sjedon.ast.body[0].expression))
-        } else {
-            // It's a statement, so eval it.
-            return done(null, sjedon.run());
+        try {
+            if (x[0] === '(' && sjedon.ast.body[0].type === 'ExpressionStatement') {
+                // It's an expression, so eval it and show the result.
+                return done(null, sjedon.evalExpression(sjedon.ast.body[0].expression))
+            } else {
+                // It's a statement, so eval it.
+                return done(null, sjedon.run());
+            }
+        } catch(e) {
+            return done(e);
         }
-    } catch(e) {
-        return done(e);
     }
+}
+
+function runScript(script, args) {
+    var fs = require('fs');
+    fs.readFile(script, function (err, data) {
+        if (err) throw err;
+        sjedon = new Sjedon(esprima.parse(data), {
+            global: { console: console }
+        })
+        sjedon.run();
+    });
+}
+
+var args = process.argv.slice(2)
+
+if (args.length) {
+    runScript(args[0], args.slice(1));
+} else {
+    runRepl();
 }
 
