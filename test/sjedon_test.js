@@ -141,7 +141,7 @@ describe('code:', function () {
         });
         function spyCalledThriceWith012(spy) {
             ok(spy.called);
-            ok(spy.calledThrice);
+            ok(spy.calledThrice, 'function was called 3 times (got: ' + spy.getCalls().length + ')');
             ok.deepEqual(spy.firstCall.args, [0]);
             ok.deepEqual(spy.secondCall.args, [1]);
             ok.deepEqual(spy.thirdCall.args, [2]);
@@ -150,6 +150,12 @@ describe('code:', function () {
             it('loops', function () {
                 evalStatements(
                     'for(var i = 0; i < 3; i++) { spy(i) }',
+                    global)
+                spyCalledThriceWith012(spy);
+            });
+            it('can be continued', function () {
+                evalStatements(
+                    'for(var i = -3; i < 3; i++) { if (i < 0) { continue; } spy(i) }',
                     global)
                 spyCalledThriceWith012(spy);
             });
@@ -163,6 +169,12 @@ describe('code:', function () {
             it('loops', function () {
                 evalStatements(
                     'while(i++ < 2) { spy(i); }', { spy: spy, i: -1 })
+                spyCalledThriceWith012(spy);
+            });
+            it('can be continued', function () {
+                evalStatements(
+                    'while(i++ < 2) { if (i < 0) { continue; } spy(i) }',
+                    { spy: spy, i: -10 })
                 spyCalledThriceWith012(spy);
             });
             it('is breakable', function () {
@@ -186,6 +198,12 @@ describe('code:', function () {
                 evalStatements(
                     'do { spy(); break; } while (1)', global);
                 ok(spy.calledOnce)
+            });
+            it('can be continued', function () {
+                evalStatements(
+                    'do { i++; if (i < 0) { continue; } spy(i); } while (i < 2)',
+                    { spy: spy, i: -10 })
+                spyCalledThriceWith012(spy);
             });
         });
     });
