@@ -70,7 +70,16 @@ describe('code:', function () {
             ok.strictEqual(evalExpr('void 1', undefined));
             ok.strictEqual(evalExpr('void {}', undefined));
         })
-        // TODO delete
+        it('delete', function () {
+            var s = aSjedon('var obj = { foo: "bar" }; delete obj.foo;')
+            var spy = sinon.spy(s, 'propertyDelete');
+            s.run();
+            ok(spy.calledOnce);
+            ok.equal(spy.lastCall.args[1], 'foo');
+        })
+        it('delete (always returns true)', function () {
+            ok.strictEqual(evalExpr('delete {}.foo'), true);
+        });
         // TODO typeof
         it('+', function () {
             ok.strictEqual(evalExpr('+"1"'), 1);
@@ -184,6 +193,7 @@ describe('code:', function () {
 
 describe('property access:', function () {
     var obj = '({ a: 1, 2: 2 })';
+    var global = function () { return { foo: { bar: 0 } } };
 
     it('The in operator returns a boolean indicating whether the property is present in the object', function () {
         ok.equal(evalExpr('"a" in ' + obj), true, 'object should contain "a"');
@@ -205,8 +215,15 @@ describe('property access:', function () {
             { a: 0, 2: 2 });
     });
 
+    it('Properties of objects can be deleted', function () {
+        ok.deepEqual(evalStatements('delete foo.bar; return foo;', global()), {});
+        ok.deepEqual(evalStatements('delete foo["bar"]; return foo;', global()), {});
+        ok.deepEqual(
+            evalStatements('delete foo.bar.baz; return foo.bar', {foo: {bar: {baz: 2}}}),
+            {});
+    });
+
     it('Properties of objects can be incremented, decremented, using the prefix/postfix operators', function () {
-        var global = function () { return { foo: { bar: 0 } } };
         ok.deepEqual(evalExpr('[foo.bar++, foo.bar]', global()), [ 0 ,  1])
         ok.deepEqual(evalExpr('[foo.bar--, foo.bar]', global()), [ 0 , -1])
         ok.deepEqual(evalExpr('[++foo.bar, foo.bar]', global()), [ 1 ,  1])
