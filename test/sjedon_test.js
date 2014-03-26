@@ -287,7 +287,7 @@ describe('functions', function () {
     describe('arguments', function () {
         it('are accessible as variables', function () {
             var funcWithArgs = aSjedon('(function (a,b,c) { return a; })');
-            var result = funcWithArgs.callFunction(funcWithArgs.ast.body[0].expression, null, [ 2 ]);
+            var result = funcWithArgs.callFunction(funcWithArgs.ast.body[0].expression, null, null, [ 2 ]);
             ok.strictEqual(result, 2);
         });
         it('when too few arguments are passed, they are set as undefined', function () {
