@@ -276,12 +276,14 @@ describe('functions', function () {
         var result = emptyReturn.callFunction(emptyReturn.ast.body[0].expression);
         ok.equal(result, 1);
     })
-    it('have a length. its length is the number of parameters (sorry, specs)', function () {
+    // No, I'm really going to follow the specs (for now)
+    /*
+    xit('have a length. its length is the number of parameters (sorry, specs)', function () {
         var length0 = evalExpr('(function () {}).length');
         ok.equal(length0, 0);
         var length1 = evalExpr('(function (a) {}).length');
         ok.equal(length1, 1);
-    });
+    }); */
     describe('arguments', function () {
         it('are accessible as variables', function () {
             var funcWithArgs = aSjedon('(function (a,b,c) { return a; })');
@@ -559,6 +561,18 @@ describe('"Native" objects', function () {
         var wrappedFunc = global.userFunc.lastCall.args[0];
         ok.equal(typeof wrappedFunc, 'function');
         ok.equal(wrappedFunc(3), 3);
+    });
+});
+
+describe('Asynchronous calls:', function () {
+    // TODO can't modify variables for some reason.
+    xit('inner functions can be done from the outside', function () {
+        var o = evalStatements('var a = 3;\n' +
+            'return { set: function (x) { a = x }, get: function () { return a } }');
+        
+        ok.equal(o.get(), 3);
+        o.set(5);
+        ok.equal(o.get(), 3);
     });
 });
 
