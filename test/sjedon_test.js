@@ -17,12 +17,12 @@ describe('Sjedon class', function () {
     })
 })
 
-function aSjedon(ast) {
+function aSjedon(ast, global) {
     if (typeof ast === 'function') { ast = '(' + ast + ')();' }
     if (typeof ast === 'string') {
         ast = esprima.parse(ast);
     }
-    return new Sjedon(ast);
+    return new Sjedon(ast, { global: global });
 }
 function evalExpr(expr, global) {
     var sjedon = new Sjedon(esprima.parse(expr), { global: global });
@@ -498,6 +498,31 @@ describe('StackFrame', function () {
             ok.equal(sjedon.trace(), 123)
             ok(sjedon.currentFrame.trace.calledOnce)
         })
+        it('works with sjedon\'s wrapped functions', function (done) {
+            var sjedon = aSjedon('(' + function a() {
+                function c() {
+                    traceme();
+                }
+
+                function b() {
+                    c();
+                }
+
+                b();
+            } + ')()', { traceme: traceme })
+
+            function traceme() {
+                var trace = sjedon.trace();
+                ok.equal(trace[0].frame.ast.type, 'Program', 'first stack frame is the program');
+                ok.equal(trace[1].frame.ast.id.name, 'a');
+                ok.equal(trace[2].frame.ast.id.name, 'b');
+                ok.equal(trace[3].frame.ast.id.name, 'c');
+                ok.equal(trace.length, 4);
+                done();
+            }
+
+            sjedon.run();
+        });
     })
     describe('running a function', function () {
         it('assignments occur', function () {
