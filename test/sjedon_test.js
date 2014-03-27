@@ -259,21 +259,21 @@ describe('functions', function () {
         funcAST = func.ast.body[0].expression
     })
     it('return values', function () {
-        var result = simpleFunc.callFunction(funcAST);
+        var result = simpleFunc.evalCall(funcAST);
         ok.equal(result, 3);
         ok.equal(typeof result, 'number');
     })
     it('return undefined by default', function () {
         var emptyReturn = aSjedon('(function () { return; })');
-        var result = emptyReturn.callFunction(emptyReturn.ast.body[0].expression);
+        var result = emptyReturn.evalCall(emptyReturn.ast.body[0].expression);
         ok.equal(typeof result, 'undefined');
 
-        result = simpleFunc.callFunction(simpleFuncAST);
+        result = simpleFunc.evalCall(simpleFuncAST);
         ok.equal(typeof result, 'undefined');
     })
     it('still return when not the only statement', function () {
         var emptyReturn = aSjedon('(function () { \/\* empty statement \*\/; return 1; })');
-        var result = emptyReturn.callFunction(emptyReturn.ast.body[0].expression);
+        var result = emptyReturn.evalCall(emptyReturn.ast.body[0].expression);
         ok.equal(result, 1);
     })
     // No, I'm really going to follow the specs (for now)
@@ -286,7 +286,7 @@ describe('functions', function () {
     describe('arguments', function () {
         it('are accessible as variables', function () {
             var funcWithArgs = aSjedon('(function (a,b,c) { return a; })');
-            var result = funcWithArgs.callFunction(funcWithArgs.ast.body[0].expression, null, null, [ 2 ]);
+            var result = funcWithArgs.evalCall(funcWithArgs.ast.body[0].expression, null, [ 2 ]);
             ok.strictEqual(result, 2);
         });
         it('when too few arguments are passed, they are set as undefined', function () {
@@ -360,7 +360,7 @@ describe('functions', function () {
             var fakeStackFrame = {fake: 'stackframe'};
             var spy = this.stub(Sjedon, 'StackFrame').returns(fakeStackFrame);
 
-            func.callFunction(funcAST);
+            func.evalCall(funcAST);
             ok(spy.calledOnce)
             ok(spy.calledWithNew())
         }))
@@ -563,14 +563,13 @@ describe('"Native" objects', function () {
 });
 
 describe('Asynchronous calls:', function () {
-    // TODO can't modify variables for some reason.
-    xit('inner functions can be done from the outside', function () {
+    it('inner functions can be done from the outside', function () {
         var o = evalStatements('var a = 3;\n' +
             'return { set: function (x) { a = x }, get: function () { return a } }');
         
         ok.equal(o.get(), 3);
         o.set(5);
-        ok.equal(o.get(), 3);
+        ok.equal(o.get(), 5);
     });
 });
 
