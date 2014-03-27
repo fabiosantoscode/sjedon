@@ -395,17 +395,6 @@ describe('var scope:', function () {
             ok.deepEqual(vars, ['arguments', 'x']);
         })
     })
-    it('we are able to find the scope of a variable', function () {
-        var foundScope = sjedon.findScope(xFunc, 'x')
-        ok.strictEqual(foundScope, xFunc)
-    })
-    it('getting to the global scope', function () {
-        var foundScope = sjedon.findScope(emptyFunc, 'x')
-        ok.strictEqual(foundScope, sjedon.ast)
-    })
-    it('return null for implicit variables', function () {
-        ok.strictEqual(sjedon.findScope(emptyFunc, 'notexist'), null)
-    })
 });
 
 describe('StackFrame', function () {
