@@ -355,7 +355,7 @@ describe('functions', function () {
             ok.strictEqual(spy.lastCall.thisValue, undefined);
         });
     });
-    describe('calling functions', function () {
+    describe('(calling functions)', function () {
         it('cause StackFrame\'s to be constructed.', sinon.test(function () {
             var fakeStackFrame = {fake: 'stackframe'};
             var spy = this.stub(Sjedon, 'StackFrame').returns(fakeStackFrame);
@@ -364,6 +364,31 @@ describe('functions', function () {
             ok(spy.calledOnce)
             ok(spy.calledWithNew())
         }))
+        it('with the new keyword', function () {
+            var spy = sinon.spy()
+            aSjedon('(' + function () {
+                function SomeClass() {
+                    spy(this, SomeClass);
+                }
+
+                SomeClass.prototype.b = 'b'
+
+                new SomeClass();
+            } + '())', { spy: spy }).run();
+
+            ok(spy.calledOnce)
+            ok(spy.lastCall.args[0].b === 'b')
+            ok(!{}.hasOwnProperty.call(spy.lastCall.args[0], 'b'))
+
+            ok(spy.lastCall.args[1].prototype.b)
+            ok({}.hasOwnProperty.call(spy.lastCall.args[1].prototype, 'b'))
+        });
+        it('new keyword (outside functions)', function () {
+            var spy = sinon.spy()
+            evalExpr('new spy()', { spy: spy });
+            ok(spy.calledOnce)
+            ok(spy.calledWithNew)
+        });
     })
 })
 

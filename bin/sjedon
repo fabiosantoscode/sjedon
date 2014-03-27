@@ -42,10 +42,11 @@ function runRepl() {
 
 function runScript(script, args) {
     var fs = require('fs');
-    fs.readFile(script, function (err, data) {
+    fs.readFile(script, { encoding: 'utf-8' }, function (err, program) {
         if (err) throw err;
-        sjedon = new Sjedon(esprima.parse(data), {
-            global: { console: console }
+        program = program.replace(/^\#!.+/, '');
+        sjedon = new Sjedon(esprima.parse(program), {
+            global: { console: console, module: {}, require: require }
         })
         sjedon.run();
     });
