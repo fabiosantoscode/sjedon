@@ -272,18 +272,17 @@ describe('functions', function () {
         ok.equal(typeof result, 'undefined');
     })
     it('still return when not the only statement', function () {
-        var emptyReturn = aSjedon('(function () { /* empty statement */; return 1; })');
+        var emptyReturn = aSjedon('(function () { \/\* empty statement \*\/; return 1; })');
         var result = emptyReturn.callFunction(emptyReturn.ast.body[0].expression);
         ok.equal(result, 1);
     })
     // No, I'm really going to follow the specs (for now)
-    /*
-    xit('have a length. its length is the number of parameters (sorry, specs)', function () {
-        var length0 = evalExpr('(function () {}).length');
-        ok.equal(length0, 0);
-        var length1 = evalExpr('(function (a) {}).length');
-        ok.equal(length1, 1);
-    }); */
+    // xit('have a length. its length is the number of parameters (sorry, specs)', function () {
+    //     var length0 = evalExpr('(function () {}).length');
+    //     ok.equal(length0, 0);
+    //     var length1 = evalExpr('(function (a) {}).length');
+    //     ok.equal(length1, 1);
+    // });
     describe('arguments', function () {
         it('are accessible as variables', function () {
             var funcWithArgs = aSjedon('(function (a,b,c) { return a; })');
@@ -439,11 +438,13 @@ describe('StackFrame', function () {
         aFrame = new Sjedon.StackFrame({
             sjedon: sjedon,
             ast: a,
+            closure: globalFrame,
             parent: globalFrame
         })
         bFrame = new Sjedon.StackFrame({
             sjedon: sjedon,
             ast: b,
+            closure: globalFrame,
             parent: aFrame
         })
         sjedon.currentFrame = aFrame
@@ -475,12 +476,9 @@ describe('StackFrame', function () {
         })
     })
     describe('variables', function () {
-        beforeEach(function () {
-            globalFrame.variables['someValue'] = 'someValue'
-        })
         it('can be fetched', function () {
             ok.equal(aFrame.fetchVar('x'), undefined)
-            ok.equal(aFrame.fetchVar('someValue'), 'someValue')
+            ok.equal(aFrame.fetchVar('globVar'), undefined)
         })
         it('can be assigned', function () {
             bFrame.assignVar('y', 'yeah')
@@ -490,7 +488,7 @@ describe('StackFrame', function () {
             bFrame.assignVar('globVar', 'yeah')
             ok.equal(globalFrame.fetchVar('globVar'), 'yeah')
         })
-        it('can\'t set a global if it is not declared', function () {
+        it('can\'t set a variable if it is not declared', function () {
             ok.throws(function () {
                 bFrame.assignVar('notexist', 'whatevs')
             })
