@@ -366,6 +366,7 @@ describe('functions', function () {
         }))
         it('with the new keyword', function () {
             var spy = sinon.spy()
+            var spy2 = sinon.spy()
             aSjedon('(' + function () {
                 function SomeClass() {
                     spy(this, SomeClass);
@@ -373,8 +374,8 @@ describe('functions', function () {
 
                 SomeClass.prototype.b = 'b'
 
-                new SomeClass();
-            } + '())', { spy: spy }).run();
+                spy2(new SomeClass());
+            } + '())', { spy: spy, spy2: spy2 }).run();
 
             ok(spy.calledOnce)
             ok(spy.lastCall.args[0].b === 'b')
@@ -382,6 +383,8 @@ describe('functions', function () {
 
             ok(spy.lastCall.args[1].prototype.b)
             ok({}.hasOwnProperty.call(spy.lastCall.args[1].prototype, 'b'))
+
+            ok(spy2.lastCall.args[0] === spy.lastCall.args[0]);
         });
         it('new keyword (outside functions)', function () {
             var spy = sinon.spy()
