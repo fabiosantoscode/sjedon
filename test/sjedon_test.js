@@ -388,9 +388,10 @@ describe('functions', function () {
         });
         it('new keyword (outside functions)', function () {
             var spy = sinon.spy()
-            evalExpr('new spy()', { spy: spy });
+            evalExpr('new spy(1)', { spy: spy });
             ok(spy.calledOnce)
             ok(spy.calledWithNew)
+            ok.deepEqual(spy.lastCall.args, [1])
         });
     })
 })

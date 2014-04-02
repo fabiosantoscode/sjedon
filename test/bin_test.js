@@ -14,16 +14,40 @@ describe('sjedon binary', function () {
     var sjedonPath = path.join(__dirname, '../bin/sjedon')
     var binTestPath = path.join(__dirname, '_bintest.js')
 
-    it('runs code in the repl', function (done) {
-        var repl = child_process.spawn('node', [sjedonPath]);
-        var first = true
-        repl.stdout.on('data', function(data) {
-            if ((data+'').trim() === '4') {
-                repl.kill();
-                return done(null);
-            }
+    describe('(repl mode)', function() {
+        it('runs code in the repl', function (done) {
+            var repl = child_process.spawn('node', [sjedonPath]);
+            repl.stdout.on('data', function(data) {
+                if ((data+'').trim() === '4') {
+                    repl.kill();
+                    return done(null);
+                }
+            });
+            repl.stdin.write('2 + 2\n')
         });
-        repl.stdin.write('2 + 2\n')
+
+        it('runs statements in the repl', function (done) {
+            var repl = child_process.spawn('node', [sjedonPath]);
+            repl.stdout.on('data', function(data) {
+                if ((data+'').trim() === '4') {
+                    repl.kill();
+                    return done(null);
+                }
+            });
+            repl.stdin.write('console.log(2 + 2);\n')
+        });
+
+        it('creates variables', function (done) {
+            var repl = child_process.spawn('node', [sjedonPath]);
+            repl.stdout.on('data', function(data) {
+                if ((data+'').trim() === '4') {
+                    repl.kill();
+                    return done(null);
+                }
+            });
+            repl.stdin.write('var x = 4\n')
+            repl.stdin.write('x\n')
+        })
     });
 
     it('runs scripts in files', function (done) {

@@ -5,13 +5,23 @@ var repl = require('repl');
 var esprima = require('esprima');
 var Sjedon = require('../lib/sjedon.js');
 
-var sjedon = new Sjedon(esprima.parse(''));
+function inheritFrom(obj) {
+    var f = function () {};
+    f.prototype = obj;
+    return new f;
+}
+
+var proc = inheritFrom(process);
+proc.argv = args;
+var nodeGlobals = { console: console, module: {}, require: require, process: proc }
 
 function runRepl() {
     new repl.REPLServer({
         prompt: 'sjedon> ',
         eval: sjedonReplEval
     });
+
+    var sjedon = new Sjedon(esprima.parse(''), { global: nodeGlobals });
 
     function sjedonReplEval(x, _, __, done) {
         try {
@@ -42,20 +52,22 @@ function runRepl() {
 
 function runScript(script, args) {
     var fs = require('fs');
-    fs.readFile(script, { encoding: 'utf-8' }, function (err, program) {
-        if (err) throw err;
-        program = program.replace(/^\#!.+/, '');
-        sjedon = new Sjedon(esprima.parse(program), {
-            global: { console: console, module: {}, require: require }
-        })
-        sjedon.run();
-    });
+    var program = fs.readFileSync(script, { encoding: 'utf-8' })
+    program = program.replace(/^\#!.+/, '');
+
+    var sjedon = new Sjedon(esprima.parse(program), {
+        global: nodeGlobals
+    })
+
+    sjedon.run();
 }
 
-var args = process.argv.slice(2)
+var args = process.argv.slice(1)
 
-if (args.length) {
-    runScript(args[0], args.slice(1));
+if (process.argv.length > 2) {
+    // The script name is argv[2], and we pass it everything except
+    // argv[0] which is node
+    runScript(process.argv[2], process.argv.slice(1));
 } else {
     runRepl();
 }
