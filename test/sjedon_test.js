@@ -609,10 +609,25 @@ describe('Asynchronous calls:', function () {
     it('inner functions can be done from the outside', function () {
         var o = evalStatements('var a = 3;\n' +
             'return { set: function (x) { a = x }, get: function () { return a } }');
-        
+
         ok.equal(o.get(), 3);
         o.set(5);
         ok.equal(o.get(), 5);
+    });
+    it('sjedon can use setTimeout and be called later', function (done) {
+        var spy = sinon.spy()
+
+        evalStatements('setTimeout(function () { spy(); }, 0)', {
+            spy: spy,
+            setTimeout: setTimeout
+        });
+
+        ok(spy.notCalled);
+
+        setTimeout(function () {
+            ok(spy.called)
+            done()
+        }, 40)
     });
 });
 
