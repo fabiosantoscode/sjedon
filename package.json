@@ -29,6 +29,6 @@
   "dependencies": {
     "escope": "~1.0.1",
     "sinon": "~1.8.2",
-    "wentto": "0.0.3"
+    "wentto": "0.0.4"
   }
 }
