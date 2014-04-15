@@ -42,7 +42,7 @@ function runRepl() {
                 return done(null, sjedon.evalExpression(sjedon.ast.body[0].expression))
             } else {
                 // It's a statement, so eval it.
-                return done(null, sjedon.run());
+                return done(null, sjedon.eval());
             }
         } catch(e) {
             return done(e);
@@ -59,7 +59,7 @@ function runScript(script, args) {
         global: nodeGlobals
     })
 
-    sjedon.run();
+    sjedon.eval();
 }
 
 var args = process.argv.slice(1)

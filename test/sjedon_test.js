@@ -73,7 +73,7 @@ describe('code:', function () {
         it('delete', function () {
             var s = aSjedon('var obj = { foo: "bar" }; delete obj.foo;')
             var spy = sinon.spy(s, 'propertyDelete');
-            s.run();
+            s.eval();
             ok(spy.calledOnce);
             ok.equal(spy.lastCall.args[1], 'foo');
         })
@@ -356,9 +356,9 @@ describe('functions', function () {
         });
     });
     describe('(calling functions)', function () {
-        it('cause StackFrame\'s to be constructed.', sinon.test(function () {
-            var fakeStackFrame = {fake: 'stackframe'};
-            var spy = this.stub(Sjedon, 'StackFrame').returns(fakeStackFrame);
+        it('cause ExecutionContext\'s to be constructed.', sinon.test(function () {
+            var fakeExecutionContext = {fake: 'stackframe'};
+            var spy = this.stub(Sjedon, 'ExecutionContext').returns(fakeExecutionContext);
 
             func.evalCall(funcAST);
             ok(spy.calledOnce)
@@ -375,7 +375,7 @@ describe('functions', function () {
                 SomeClass.prototype.b = 'b'
 
                 spy2(new SomeClass());
-            } + '())', { spy: spy, spy2: spy2 }).run();
+            } + '())', { spy: spy, spy2: spy2 }).eval();
 
             ok(spy.calledOnce)
             ok(spy.lastCall.args[0].b === 'b')
@@ -426,7 +426,7 @@ describe('var scope:', function () {
     })
 });
 
-describe('StackFrame', function () {
+describe('ExecutionContext', function () {
     var sjedon
     var a, b
     var globalFrame, aFrame, bFrame
@@ -448,18 +448,18 @@ describe('StackFrame', function () {
         a = sjedon.ast.body[1]
         b = sjedon.ast.body[2]
         ok(a); ok(b)
-        globalFrame = new Sjedon.StackFrame({
+        globalFrame = new Sjedon.ExecutionContext({
             sjedon: sjedon,
             ast: sjedon.ast,
             parent: null
         })
-        aFrame = new Sjedon.StackFrame({
+        aFrame = new Sjedon.ExecutionContext({
             sjedon: sjedon,
             ast: a,
             closure: globalFrame,
             parent: globalFrame
         })
-        bFrame = new Sjedon.StackFrame({
+        bFrame = new Sjedon.ExecutionContext({
             sjedon: sjedon,
             ast: b,
             closure: globalFrame,
@@ -471,7 +471,7 @@ describe('StackFrame', function () {
         it('calls scopeVariables', function () {
             sinon.spy(sjedon, 'scopeVariables')
 
-            new Sjedon.StackFrame({
+            new Sjedon.ExecutionContext({
                 sjedon: sjedon,
                 ast: a,
                 parent: null
@@ -513,7 +513,7 @@ describe('StackFrame', function () {
         })
     })
     describe('tracing', function () {
-        it('get stack info above a StackFrame', function () {
+        it('get stack info above a ExecutionContext', function () {
             var trace = bFrame.trace()
             ok(trace && 'length' in trace)
             ok.equal(trace.length, 3)
@@ -550,27 +550,27 @@ describe('StackFrame', function () {
                 done();
             }
 
-            sjedon.run();
+            sjedon.eval();
         });
     })
     describe('running a function', function () {
         it('assignments occur', function () {
-            var OriginalStackFrame = Sjedon.StackFrame
+            var OriginalExecutionContext = Sjedon.ExecutionContext
             var mockFrame
-            sinon.stub(Sjedon, 'StackFrame', function (opts) {
+            sinon.stub(Sjedon, 'ExecutionContext', function (opts) {
                 ok.equal(arguments.length, 1, 'sanity check');
-                mockFrame = new OriginalStackFrame(opts);
+                mockFrame = new OriginalExecutionContext(opts);
                 mockFrame.assignVar = sinon.stub()
                 return mockFrame
             })
             sjedon.runFunction(b)
-            ok(Sjedon.StackFrame.calledOnce, 'StackFrame got created');
+            ok(Sjedon.ExecutionContext.calledOnce, 'ExecutionContext got created');
             ok(mockFrame.assignVar.called, 'assignVar() called')
             ok(mockFrame.assignVar.calledOnce, 'assignVar() called only once')
             ok.deepEqual(mockFrame.assignVar.lastCall.args,
                 ['y', 3],
                 'assignVar() called with ({type: "Identifier", name: "y"}, 3)')
-            Sjedon.StackFrame.restore();
+            Sjedon.ExecutionContext.restore();
         })
     })
 })
@@ -588,7 +588,7 @@ describe('"Native" objects', function () {
 
     it('can be used for user callbacks', function () {
         var sjedon = new Sjedon(esprima.parse('userFunc(1, 2, "3")'), {global: global})
-        sjedon.run();
+        sjedon.eval();
         ok(global.userFunc.calledOnce, 'user callback was called from inside Sjedon');
         ok.deepEqual(global.userFunc.lastCall.args, [1, 2, '3'])
     });
@@ -598,7 +598,7 @@ describe('"Native" objects', function () {
             'userFunc(function(v){ return v })'), {
                 global: global });
         
-        sjedon.run();
+        sjedon.eval();
         var wrappedFunc = global.userFunc.lastCall.args[0];
         ok.equal(typeof wrappedFunc, 'function');
         ok.equal(wrappedFunc(3), 3);
