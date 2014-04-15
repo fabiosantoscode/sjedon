@@ -27,7 +27,8 @@
     "test": "grunt simplemocha"
   },
   "dependencies": {
+    "escope": "~1.0.1",
     "sinon": "~1.8.2",
-    "escope": "~1.0.1"
+    "wentto": "0.0.3"
   }
 }
