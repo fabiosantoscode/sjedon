@@ -39,7 +39,7 @@ function runRepl() {
         try {
             if (x[0] === '(' && sjedon.ast.body[0].type === 'ExpressionStatement') {
                 // It's an expression, so eval it and show the result.
-                return done(null, sjedon.evalExpression(sjedon.ast.body[0].expression))
+                return done(null, sjedon.eval('(' + sjedon.ast.body[0].expression + ')'))
             } else {
                 // It's a statement, so eval it.
                 return done(null, sjedon.eval());

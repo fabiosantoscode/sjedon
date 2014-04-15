@@ -26,7 +26,7 @@ function aSjedon(ast, global) {
 }
 function evalExpr(expr, global) {
     var sjedon = new Sjedon(esprima.parse(expr), { global: global });
-    return sjedon.evalExpression(sjedon.ast.body[0].expression);
+    return sjedon._evalExpression(sjedon.ast.body[0].expression);
 }
 function evalStatements(s, global) {
     return evalExpr('(function(){\n'+s+'\n}())', global);
@@ -259,21 +259,21 @@ describe('functions', function () {
         funcAST = func.ast.body[0].expression
     })
     it('return values', function () {
-        var result = simpleFunc.evalCall(funcAST);
+        var result = simpleFunc._evalCall(funcAST);
         ok.equal(result, 3);
         ok.equal(typeof result, 'number');
     })
     it('return undefined by default', function () {
         var emptyReturn = aSjedon('(function () { return; })');
-        var result = emptyReturn.evalCall(emptyReturn.ast.body[0].expression);
+        var result = emptyReturn._evalCall(emptyReturn.ast.body[0].expression);
         ok.equal(typeof result, 'undefined');
 
-        result = simpleFunc.evalCall(simpleFuncAST);
+        result = simpleFunc._evalCall(simpleFuncAST);
         ok.equal(typeof result, 'undefined');
     })
     it('still return when not the only statement', function () {
         var emptyReturn = aSjedon('(function () { \/\* empty statement \*\/; return 1; })');
-        var result = emptyReturn.evalCall(emptyReturn.ast.body[0].expression);
+        var result = emptyReturn._evalCall(emptyReturn.ast.body[0].expression);
         ok.equal(result, 1);
     })
     // No, I'm really going to follow the specs (for now)
@@ -286,7 +286,7 @@ describe('functions', function () {
     describe('arguments', function () {
         it('are accessible as variables', function () {
             var funcWithArgs = aSjedon('(function (a,b,c) { return a; })');
-            var result = funcWithArgs.evalCall(funcWithArgs.ast.body[0].expression, null, [ 2 ]);
+            var result = funcWithArgs._evalCall(funcWithArgs.ast.body[0].expression, null, [ 2 ]);
             ok.strictEqual(result, 2);
         });
         it('when too few arguments are passed, they are set as undefined', function () {
@@ -360,7 +360,7 @@ describe('functions', function () {
             var fakeExecutionContext = {fake: 'stackframe'};
             var spy = this.stub(Sjedon, 'ExecutionContext').returns(fakeExecutionContext);
 
-            func.evalCall(funcAST);
+            func._evalCall(funcAST);
             ok(spy.calledOnce)
             ok(spy.calledWithNew())
         }))
@@ -563,7 +563,7 @@ describe('ExecutionContext', function () {
                 mockFrame.assignVar = sinon.stub()
                 return mockFrame
             })
-            sjedon.runFunction(b)
+            sjedon._evalFunctionCall(b)
             ok(Sjedon.ExecutionContext.calledOnce, 'ExecutionContext got created');
             ok(mockFrame.assignVar.called, 'assignVar() called')
             ok(mockFrame.assignVar.calledOnce, 'assignVar() called only once')
@@ -583,7 +583,7 @@ describe('"Native" objects', function () {
     it('are fed through the "global" option to Sjedon', function () {
         var sjedon = new Sjedon(esprima.parse('(function(){return TESTING;}())'), {
             global: global });
-        ok.equal(sjedon.evalExpression(sjedon.ast.body[0].expression), '1234')
+        ok.equal(sjedon._evalExpression(sjedon.ast.body[0].expression), '1234')
     });
 
     it('can be used for user callbacks', function () {
