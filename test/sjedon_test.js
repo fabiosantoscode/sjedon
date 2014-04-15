@@ -249,7 +249,7 @@ describe('property access:', function () {
     });
 });
 
-describe('functions', function () {
+xdescribe('functions', function () {
     var simpleFunc, simpleFuncAST
     var func, funcAST
     beforeEach(function () {
@@ -554,7 +554,7 @@ describe('ExecutionContext', function () {
         });
     })
     describe('running a function', function () {
-        it('assignments occur', function () {
+        xit('assignments occur', function () {
             var OriginalExecutionContext = Sjedon.ExecutionContext
             var mockFrame
             sinon.stub(Sjedon, 'ExecutionContext', function (opts) {
