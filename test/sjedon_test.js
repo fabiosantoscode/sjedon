@@ -26,7 +26,7 @@ function aSjedon(ast, global) {
 }
 function evalExpr(expr, global) {
     var sjedon = new Sjedon(esprima.parse(expr), { global: global });
-    return sjedon._evalExpression(sjedon.ast.body[0].expression);
+    return sjedon.evalExpression(sjedon.ast.body[0].expression);
 }
 function evalStatements(s, global) {
     return evalExpr('(function(){\n'+s+'\n}())', global);
@@ -249,7 +249,7 @@ describe('property access:', function () {
     });
 });
 
-xdescribe('functions', function () {
+describe('functions', function () {
     var simpleFunc, simpleFuncAST
     var func, funcAST
     beforeEach(function () {
@@ -357,8 +357,7 @@ xdescribe('functions', function () {
     });
     describe('(calling functions)', function () {
         it('cause ExecutionContext\'s to be constructed.', sinon.test(function () {
-            var fakeExecutionContext = {fake: 'stackframe'};
-            var spy = this.stub(Sjedon, 'ExecutionContext').returns(fakeExecutionContext);
+            var spy = this.spy(Sjedon, 'ExecutionContext');
 
             func._evalCall(funcAST);
             ok(spy.calledOnce)
@@ -512,7 +511,7 @@ describe('ExecutionContext', function () {
             })
         })
     })
-    describe('tracing', function () {
+    xdescribe('tracing', function () {
         it('get stack info above a ExecutionContext', function () {
             var trace = bFrame.trace()
             ok(trace && 'length' in trace)
@@ -575,7 +574,7 @@ describe('ExecutionContext', function () {
     })
 })
 
-describe('"Native" objects', function () {
+xdescribe('"Native" objects', function () {
     var global
     beforeEach(function () {
         global = { userFunc: sinon.spy(), TESTING: '1234' }
@@ -605,7 +604,7 @@ describe('"Native" objects', function () {
     });
 });
 
-describe('Asynchronous calls:', function () {
+xdescribe('Asynchronous calls:', function () {
     it('inner functions can be done from the outside', function () {
         var o = evalStatements('var a = 3;\n' +
             'return { set: function (x) { a = x }, get: function () { return a } }');
