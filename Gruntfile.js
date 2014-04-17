@@ -2,11 +2,18 @@
 
 module.exports = function (grunt) {
   require('jit-grunt')(grunt, {
-    'simplemocha': 'grunt-simple-mocha'
+    'simplemocha': 'grunt-simple-mocha',
+    'shell': 'grunt-shell'
   });
 
   // Project configuration.
   grunt.initConfig({
+    shell: {
+      cpp: {
+        command: 'cpp -P -undef -Wundef -std=c99 -nostdinc -Wtrigraphs -fdollars-in-identifiers -C lib/sjedon-eval.cpp.js > lib/sjedon-eval.js',
+        options: { stderr: true },
+      }
+    },
     simplemocha: {
       options: {
         timeout: 3000,
@@ -26,7 +33,10 @@ module.exports = function (grunt) {
         src: 'Gruntfile.js'
       },
       lib: {
-        src: ['lib/**/*.js']
+        src: [
+          'lib/**/*.js',
+          '!lib/sjedon-eval.js'
+        ]
       },
       tests: {
         src: ['test/**/*.js']
@@ -53,5 +63,6 @@ module.exports = function (grunt) {
   });
 
   // Default task.
-  grunt.registerTask('default', ['jshint', 'simplemocha']);
+  grunt.registerTask('default', ['build', 'jshint', 'simplemocha']);
+  grunt.registerTask('build', ['shell:cpp']);
 };

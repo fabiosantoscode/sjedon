@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "escope": "~1.0.1",
+    "grunt-shell": "^0.6.4",
     "sinon": "~1.8.2",
     "wentto": "0.0.4"
   }
