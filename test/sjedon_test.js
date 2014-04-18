@@ -57,6 +57,12 @@ describe('code:', function () {
             ok.equal(evalExpr('1/2'), 0.5);
             ok.equal(evalExpr('1-1'), 0);
         });
+        it('math binOps (spy)', sinon.test(function () {
+            var spy = this.spy(Sjedon.prototype, 'binaryExpression')
+            evalExpr('1 + 2');
+            ok.equal(spy.calledOnce, true)
+            ok.deepEqual(spy.lastCall.args, ['+', 1, 2])
+        }))
         it('prefix, postfix (increment/decrement) operators', function () {
             var global = function () { return { i: 0 } }
             ok.deepEqual(evalExpr('[i++, i]', global()), [ 0, 1])
