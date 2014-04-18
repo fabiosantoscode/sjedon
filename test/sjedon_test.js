@@ -50,6 +50,20 @@ describe('code:', function () {
     describe('operators:', function () {
         it('comma', function () {
             ok.equal(evalExpr('1,2,3'), 3);
+            ok.equal(evalExpr('0,(1,2,3),3+1'), 4);
+        })
+
+        it('comma (spies)', function() {
+            var spy1 = sinon.spy();
+            var spy2 = sinon.spy();
+            var spy3 = sinon.spy();
+            evalExpr('spy1(), spy2(), spy3()', { spy1: spy1, spy2: spy2, spy3: spy3 })
+            ok(spy1.calledOnce, 'spy 1 was called')
+            ok(spy2.calledOnce, 'spy 2 was called')
+            ok(spy3.calledOnce, 'spy 3 was called')
+
+            ok(spy1.calledBefore(spy2), 'spy 1 called before spy 2')
+            ok(spy2.calledBefore(spy3), 'spy 2 called before spy 3')
         });
         it('math binOps', function () {
             ok.equal(evalExpr('1+1'), 2);
@@ -77,11 +91,8 @@ describe('code:', function () {
             ok.strictEqual(evalExpr('void {}', undefined));
         })
         it('delete', function () {
-            var s = aSjedon('var obj = { foo: "bar" }; delete obj.foo;')
-            var spy = sinon.spy(s, 'propertyDelete');
-            s.eval();
-            ok(spy.calledOnce);
-            ok.equal(spy.lastCall.args[1], 'foo');
+            var o = evalExpr('[delete obj.foo, obj]', { obj: { foo: 'bar', baz: 'qux' }})
+            ok.deepEqual(o, [true, { baz: 'qux' }])
         })
         it('delete (always returns true)', function () {
             ok.strictEqual(evalExpr('delete {}.foo'), true);
@@ -217,7 +228,12 @@ describe('code:', function () {
 
 describe('property access:', function () {
     var obj = '({ a: 1, 2: 2 })';
-    var global = function () { return { foo: { bar: 0 } } };
+    var global = function () {
+        return {
+            names: { foo: 'foo', bar: 'bar' },
+            foo: { bar: 0 }
+        }
+    };
 
     it('The in operator returns a boolean indicating whether the property is present in the object', function () {
         ok.equal(evalExpr('"a" in ' + obj), true, 'object should contain "a"');
