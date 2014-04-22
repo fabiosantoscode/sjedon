@@ -298,6 +298,17 @@ describe('functions', function () {
         var result = emptyReturn._evalCall(emptyReturn.ast.body[0].expression);
         ok.equal(result, 1);
     })
+    it('return values unto the stack.', function () {
+        var spy = sinon.spy()
+        var spy2 = sinon.stub().returns(42)
+        var aFunc = aSjedon('(function () { spy(spy2()) })()', { spy: spy, spy2: spy2 })
+        aFunc.eval()
+
+        ok(spy.calledOnce, spy.callCount + '');
+        ok(spy2.calledOnce, spy2.callCount + '');
+        ok(spy.calledWith(42));
+    })
+
     // No, I'm really going to follow the specs (for now)
     // xit('have a length. its length is the number of parameters (sorry, specs)', function () {
     //     var length0 = evalExpr('(function () {}).length');
@@ -308,7 +319,7 @@ describe('functions', function () {
     describe('arguments', function () {
         it('are accessible as variables', function () {
             var funcWithArgs = aSjedon('(function (a,b,c) { return a; })');
-            var result = funcWithArgs._evalCall(funcWithArgs.ast.body[0].expression, null, [ 2 ]);
+            var result = funcWithArgs._evalCall(funcWithArgs.ast.body[0].expression, undefined, [ 2 ]);
             ok.strictEqual(result, 2);
         });
         it('when too few arguments are passed, they are set as undefined', function () {
@@ -388,6 +399,7 @@ describe('functions', function () {
         it('with the new keyword', function () {
             var spy = sinon.spy()
             var spy2 = sinon.spy()
+
             aSjedon('(' + function () {
                 function SomeClass() {
                     spy(this, SomeClass);
@@ -399,7 +411,7 @@ describe('functions', function () {
             } + '())', { spy: spy, spy2: spy2 }).eval();
 
             ok(spy.calledOnce)
-            ok(spy.lastCall.args[0].b === 'b')
+            ok.equal(spy.lastCall.args[0].b, 'b')
             ok(!{}.hasOwnProperty.call(spy.lastCall.args[0], 'b'))
 
             ok(spy.lastCall.args[1].prototype.b)
